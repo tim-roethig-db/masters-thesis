@@ -1,0 +1,5 @@
+*.ipynb_checkpoints
+*/lexisnexis/*
+*.csv
+*.pdf
+*.zip
