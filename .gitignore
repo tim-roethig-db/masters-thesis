@@ -3,4 +3,6 @@
 *.pdf
 *.zip
 *.idea
+*.gitignore
 /data_preprocessing/lexisnexis/
+/data/
