@@ -2,4 +2,5 @@
 *.csv
 *.pdf
 *.zip
+*.idea
 /data_preprocessing/lexisnexis/
