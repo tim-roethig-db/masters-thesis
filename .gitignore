@@ -3,6 +3,5 @@
 *.pdf
 *.zip
 *.idea
-*.gitignore
 /data/
 /models/
