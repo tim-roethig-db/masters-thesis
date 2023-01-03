@@ -6,8 +6,6 @@ class BERTNewsClf(nn.Module):
     def __init__(self):
         super(BERTNewsClf, self).__init__()
 
-        self.tokenizer = BertTokenizer.from_pretrained('../models/bert-base-uncased')
-
         self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
 
         self.feature_ext = nn.Sequential(
@@ -20,19 +18,17 @@ class BERTNewsClf(nn.Module):
             nn.Softmax(dim=1)
         )
 
-    def forward(self, x):
-        x = self.tokenizer(x, return_tensors="pt")
-        bert_output = self.bert(**x)
-        last_hidden_state, pooler_output = bert_output[0], bert_output[1]
+    def forward(self, input_ids, attention_mask):
+        last_hidden_state, pooler_output = self.bert(input_ids=input_ids, attention_mask=attention_mask, return_dict=False)
         feature_vect = self.feature_ext(pooler_output)
         y = self.clf_head(feature_vect)
 
-        return y
+        return y, feature_vect
 
 
 if __name__ == '__main__':
     model = BERTNewsClf()
     model_in = "Replace me by any text you'd like."
-    model_out = model.forward(model_in)
+    model_out = model(model_in)
     print(model_out)
     print(model_out.shape)
