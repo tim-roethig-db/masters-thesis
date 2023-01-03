@@ -16,10 +16,10 @@ class LSTMStockPriceModel(nn.Module):
         self.linear = nn.Linear(8, 1)
 
     def forward(self, x, state=None):
-        y, (h_n, c_n) = self.lstm(x, state)
-        y = self.linear(y[-1])
+        y, (h, c) = self.lstm(x, state)
+        y = self.linear(y[:, -1, :])
 
-        return y, h_n, c_n
+        return y, h, c
 
 
 if __name__ == '__main__':
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     #print(model_in.shape)
     for i in range(3):
         model_out, h, c = model(model_in, (h, c))
-        model_in = torch.cat((model_in[1:], model_out[None, :]))
+        model_in = torch.cat((model_in[:, 1:, :], model_out[:, :, None]), dim=1)
     #print(model_in)
     #print(model_in.shape)
     #print(model_out)

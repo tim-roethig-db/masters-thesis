@@ -56,3 +56,6 @@ if __name__ == '__main__':
             optimizer.step()
 
         print(f'EPOCH: {epoch} of {epochs} with CELoss: {epoch_loss/len(train_set)} and Acc: {epoch_acc/len(train_set)}')
+
+    print('Save model...')
+    torch.save(model.state_dict(), 'transformer.t7')

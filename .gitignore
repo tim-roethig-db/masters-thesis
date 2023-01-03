@@ -3,5 +3,6 @@
 *.pdf
 *.zip
 *.idea
+*.t7
 /data/
 /models/

@@ -18,6 +18,7 @@ class Dataset(torch.utils.data.Dataset):
         print(self.x.shape)
 
         self.y = df.iloc[:, 31].values.astype(self.dtype)
+        self.y = self.y[:, None]
 
     def __getitem__(self, idx):
         return self.x[idx], self.y[idx]
@@ -30,3 +31,5 @@ if __name__ == '__main__':
     df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';')
 
     ds = Dataset(df)
+
+    print(ds[0])
