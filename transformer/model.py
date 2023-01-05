@@ -1,5 +1,5 @@
 import torch.nn as nn
-from transformers import BertTokenizer, BertModel, BertConfig, AutoModel
+from transformers import BertModel
 
 
 class BERTNewsClf(nn.Module):
