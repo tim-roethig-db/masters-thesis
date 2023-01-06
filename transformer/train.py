@@ -10,6 +10,7 @@ if __name__ == '__main__':
     lr = 0.01
     epochs = 3
 
+    print(f'CUDA available: {torch.cuda.is_available()}')
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     print('Set up Data Loader...')
@@ -33,10 +34,13 @@ if __name__ == '__main__':
     print('Setup loss function...')
     loss = torch.nn.CrossEntropyLoss().to(device)
 
+    print(f'Start training with {len(train_loader.dataset)} samples...')
+
     for epoch in range(1, epochs+1):
         epoch_loss = 0
         epoch_acc = 0
         for x, y in train_loader:
+            print('Starting iter')
             # extract input ids and attention mask squeeze to format (batch_size, max_bert_sequence_len)
             input_ids = x['input_ids'].squeeze(1)
             attention_mask = x['attention_mask'].squeeze(1)
