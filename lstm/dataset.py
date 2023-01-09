@@ -14,7 +14,6 @@ class Dataset(torch.utils.data.Dataset):
 
         self.x = df.iloc[:, :30].values.astype(self.dtype)
         self.x = self.x[:, :, None]
-        print(self.x.shape)
 
         self.y = df.iloc[:, 31].values.astype(self.dtype)
         self.y = self.y[:, None]

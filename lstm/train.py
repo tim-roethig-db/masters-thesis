@@ -42,6 +42,10 @@ if __name__ == '__main__':
 
         # iter over batches
         for x, y in train_loader:
+            # move data to device
+            x = x.to(device)
+            y = y.to(device)
+
             # get prediction
             y_pred, _, _ = model(x)
 
