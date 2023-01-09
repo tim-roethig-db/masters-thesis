@@ -32,7 +32,7 @@ if __name__ == '__main__':
     )
 
     print('Setup loss function...')
-    loss = torch.nn.CrossEntropyLoss().to(device)
+    loss = torch.nn.CrossEntropyLoss(reduction='sum').to(device)
 
     print(f'Start training with {len(train_loader.dataset)} samples...')
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
             print(f'Batch CELoss: {(batch_loss/batch_size):.5f} and Batch Acc: {(batch_acc/batch_size):.5f}')
 
-        print(f'EPOCH: {epoch} of {epochs} with CELoss: {epoch_loss/len(train_set)} and Acc: {epoch_acc/len(train_set)}')
+        print(f'EPOCH: {epoch} of {epochs} with CELoss: {(epoch_loss/len(train_set)):.5f} and Acc: {(epoch_acc/len(train_set)):.5f}')
 
     print('Save model...')
     torch.save(model.state_dict(), 'transformer.t7')
