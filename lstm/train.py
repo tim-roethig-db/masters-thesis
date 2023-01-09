@@ -6,7 +6,7 @@ from model import LSTMStockPriceModel
 
 
 if __name__ == '__main__':
-    batch_size = 2
+    batch_size = 16
     lr = 0.0001
     epochs = 50
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     )
 
     print('Setup loss function...')
-    loss = torch.nn.MSELoss().to(device)
+    loss = torch.nn.MSELoss(reduction='sum').to(device)
     monitor_loss = torch.nn.L1Loss()
 
     # train loop
