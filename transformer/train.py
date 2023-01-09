@@ -6,7 +6,7 @@ from model import BERTNewsClf
 
 
 if __name__ == '__main__':
-    batch_size = 128
+    batch_size = 8
     lr = 0.01
     epochs = 3
 
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     print('Set up Data Loader...')
     df = pd.read_csv('../data/tf_dataset.csv', sep=';')#.sample(frac=1).head(40)
     train_set = Dataset(df)
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=2, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
 
     print('Loaded model to device...')
     model = BERTNewsClf().float()
