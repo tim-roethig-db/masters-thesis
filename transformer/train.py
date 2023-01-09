@@ -40,7 +40,6 @@ if __name__ == '__main__':
         epoch_loss = 0
         epoch_acc = 0
         for x, y in train_loader:
-            print('Starting iter')
             # extract input ids and attention mask squeeze to format (batch_size, max_bert_sequence_len)
             input_ids = x['input_ids'].squeeze(1).to(device)
             attention_mask = x['attention_mask'].squeeze(1).to(device)
