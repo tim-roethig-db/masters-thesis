@@ -6,7 +6,7 @@ from model import BERTNewsClf
 
 
 if __name__ == '__main__':
-    batch_size = 16
+    batch_size = 128
     lr = 0.01
     epochs = 3
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             batch_loss.backward()
             optimizer.step()
 
-            print(f'Batch CELoss: {(batch_loss):.5f} and Batch Acc: {(batch_acc):.5f}')
+            print(f'Batch CELoss: {batch_loss:.5f} and Batch Acc: {batch_acc:.5f}')
 
         print(f'EPOCH: {epoch} of {epochs} with CELoss: {epoch_loss/len(train_set)} and Acc: {epoch_acc/len(train_set)}')
 
