@@ -6,7 +6,7 @@ from model import BERTNewsClf
 
 
 if __name__ == '__main__':
-    batch_size = 8
+    batch_size = 16
     lr = 0.01
     epochs = 3
 
