@@ -7,7 +7,7 @@ from model import BERTNewsClf
 
 if __name__ == '__main__':
     batch_size = 16
-    lr = 0.01
+    lr = 0.0001
     epochs = 3
 
     print(f'CUDA available: {torch.cuda.is_available()}')
