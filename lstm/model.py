@@ -19,18 +19,19 @@ class LSTMStockPriceModel(nn.Module):
         y, (h, c) = self.lstm(x, state)
         y = self.linear(y[:, -1, :])
 
-        return y, h, c
+        return y, (h, c)
 
 
 if __name__ == '__main__':
     model = LSTMStockPriceModel()
     h = torch.zeros(2, 2, 8)
     c = torch.zeros(2, 2, 8)
+    state = None
     model_in = torch.rand(2, 30, 1)
     #print(model_in)
     #print(model_in.shape)
     for i in range(3):
-        model_out, h, c = model(model_in, (h, c))
+        model_out, state = model(model_in, state)
         model_in = torch.cat((model_in[:, 1:, :], model_out[:, :, None]), dim=1)
     #print(model_in)
     #print(model_in.shape)

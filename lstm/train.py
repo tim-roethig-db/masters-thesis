@@ -7,16 +7,16 @@ from model import LSTMStockPriceModel
 
 if __name__ == '__main__':
     batch_size = 16
-    lr = 0.0001
-    epochs = 50
+    lr = 0.001
+    epochs = 100
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     print('Set up Data Loader...')
     df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';')#.sample(frac=1).head(4)
-    train_set = Dataset(df)
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=2, shuffle=True)
+    train_set = Dataset(df, seq_len=30)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
 
     print('Loaded model to device...')
     model = LSTMStockPriceModel().float()
@@ -40,14 +40,18 @@ if __name__ == '__main__':
         epoch_loss = 0
         epoch_monitor_loss = 0
 
+        # reset state every epoch
+        state = None
+
         # iter over batches
         for x, y in train_loader:
             # move data to device
             x = x.to(device)
-            y = y.to(device)
+            y = y[:, 0, :].to(device)
 
             # get prediction
-            y_pred, _, _ = model(x)
+            state = None
+            y_pred, state = model(x, state)
 
             # compute loss
             batch_loss = loss(y_pred, y)
