@@ -8,7 +8,7 @@ from model import BERTNewsClf
 if __name__ == '__main__':
     batch_size = 16
     lr = 0.0001
-    epochs = 3
+    epochs = 1
 
     print(f'CUDA available: {torch.cuda.is_available()}')
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -45,9 +45,12 @@ if __name__ == '__main__':
             input_ids = x['input_ids'].squeeze(1).to(device)
             attention_mask = x['attention_mask'].squeeze(1).to(device)
             y = y.to(device)
+            print(input_ids.shape)
+            print(attention_mask.shape)
 
             # get prediction
             y_pred, _ = model(input_ids, attention_mask)
+            print(y_pred.shape)
 
             # compute loss
             batch_loss = loss(y_pred, y)
@@ -61,6 +64,7 @@ if __name__ == '__main__':
             optimizer.step()
 
             print(f'Batch CELoss: {(batch_loss/batch_size):.5f} and Batch Acc: {(batch_acc/batch_size):.5f}')
+            break
 
         print(f'EPOCH: {epoch} of {epochs} with CELoss: {(epoch_loss/len(train_set)):.5f} and Acc: {(epoch_acc/len(train_set)):.5f}')
 
