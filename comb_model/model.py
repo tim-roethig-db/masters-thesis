@@ -26,11 +26,9 @@ class StockPriceModel(nn.Module):
 
         self.linear = nn.Linear(n_news_features + 1, 1)
 
-    def forward(self, news_input_ids, news_attention_mask, stock_price, state=None):
+    def forward(self, news_input_ids, news_attention_mask, stock_price, news_feature_vect, state=None):
         # apply news processing for days with news
         # else fill with zeros
-        news_feature_vect = torch.zeros(size=(stock_price.shape[0], stock_price.shape[1], self.n_news_features))
-        news_feature_vect = news_feature_vect.to(self.device)
         for i in range(news_feature_vect.shape[1]):
             # if there is any input (>2 means more tokens than BOT and EOT)
             if news_input_ids[:, i, :].sum() > 0:
@@ -65,6 +63,8 @@ if __name__ == '__main__':
     news_input_ids[:, seq_len - 1, :] = torch.randint(low=0, high=10000, size=(batch_size, 512))
     news_attention_mask[:, seq_len - 1, :] = torch.randint(low=0, high=2, size=(batch_size, 512))
 
-    stock_price = torch.rand(batch_size, seq_len, 1)
+    x_price = torch.rand(batch_size, seq_len, 1)
 
-    y, state = model(news_input_ids, news_attention_mask, stock_price)
+    news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
+
+    y, state = model(news_input_ids, news_attention_mask, x_price, news_feature_vect)

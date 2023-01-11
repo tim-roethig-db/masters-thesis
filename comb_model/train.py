@@ -6,9 +6,10 @@ from model import StockPriceModel
 
 
 if __name__ == '__main__':
-    batch_size = 4
+    batch_size = 2
     lr = 0.001
     epochs = 1
+    n_news_features = 16
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -22,7 +23,7 @@ if __name__ == '__main__':
     print(f'Series length: {len(train_set)}')
 
     print('Loaded model to device...')
-    model = StockPriceModel(n_news_features=32).float()
+    model = StockPriceModel(n_news_features=n_news_features).float()
     model = model.to(device)
 
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -53,10 +54,12 @@ if __name__ == '__main__':
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
             x_price = x_price.to(device)
+            news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
+            news_feature_vect = news_feature_vect.to(device)
             y = y[:, 0, :].to(device)
 
             # get prediction
-            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price)
+            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect)
 
             # compute loss
             batch_loss = loss(y_pred, y)
