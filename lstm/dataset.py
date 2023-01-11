@@ -37,4 +37,4 @@ if __name__ == '__main__':
 
     ds = Dataset(df)
     print(len(ds))
-    print(ds[0])
+    print(ds[0][0].shape)

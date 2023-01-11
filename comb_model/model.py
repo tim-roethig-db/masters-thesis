@@ -4,7 +4,7 @@ from transformers import BertModel
 
 
 class StockPriceModel(nn.Module):
-    def __init__(self, n_news_features):
+    def __init__(self, n_news_features: int):
         super(StockPriceModel, self).__init__()
 
         self.n_news_features = n_news_features
@@ -30,6 +30,7 @@ class StockPriceModel(nn.Module):
         # else fill with zeros
         news_feature_vect = torch.zeros(size=(stock_price.shape[0], stock_price.shape[1], self.n_news_features))
         for i in range(news_feature_vect.shape[1]):
+            # if there is any input (>2 means more tokens than BOT and EOT)
             if news_input_ids[:, i, :].sum() > 0:
                 last_hidden_state, pooler_output = self.bert(
                     input_ids=news_input_ids[:, i, :],
@@ -60,7 +61,7 @@ if __name__ == '__main__':
     news_attention_mask = torch.zeros(batch_size, seq_len, 512, dtype=int)
 
     news_input_ids[:, seq_len - 1, :] = torch.randint(low=0, high=10000, size=(batch_size, 512))
-    news_attention_mask[:, seq_len - 1, :] = torch.randint(low=0, high=1, size=(batch_size, 512))
+    news_attention_mask[:, seq_len - 1, :] = torch.randint(low=0, high=2, size=(batch_size, 512))
 
     stock_price = torch.rand(batch_size, seq_len, 1)
 
