@@ -29,7 +29,6 @@ class Dataset(torch.utils.data.Dataset):
         df['title'] = df['title'].apply(lambda x: self.pd_tokenizer(x))
 
         df = df.reset_index().reset_index()
-        print(df)
 
         self.x = df[['price', 'title', 'index']].values
 
