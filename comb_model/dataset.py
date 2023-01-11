@@ -28,7 +28,10 @@ class Dataset(torch.utils.data.Dataset):
         df = df.dropna(subset=['price'])
         df['title'] = df['title'].apply(lambda x: self.pd_tokenizer(x))
 
-        self.x = df.values
+        df = df.reset_index().reset_index()
+        print(df)
+
+        self.x = df[['price', 'title', 'index']].values
 
     def __getitem__(self, idx: int):
         x_price = torch.from_numpy(self.x[idx:(idx+self.seq_len), 0].astype(self.dtype))
@@ -41,7 +44,9 @@ class Dataset(torch.utils.data.Dataset):
         y = torch.from_numpy(self.x[(idx+self.seq_len):(idx+self.seq_len+self.test_len), 0].astype(self.dtype))
         y = y[:, None]
 
-        return x_news_input_ids, x_news_attention_mask, x_price, y
+        time_stamp = self.x[idx:(idx+self.seq_len), 2].astype(int)
+
+        return x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp
 
     def __len__(self):
         return len(self.x) - self.seq_len
@@ -72,4 +77,4 @@ if __name__ == '__main__':
 
     ds = Dataset(news_df, price_df)
 
-    print(ds[0][1].shape)
+    print(ds[0][4])

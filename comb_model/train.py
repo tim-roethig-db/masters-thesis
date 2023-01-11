@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
         # iter over batches
         batch = 0
-        for x_news_input_ids, x_news_attention_mask, x_price, y in train_loader:
+        for x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp in train_loader:
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
             batch += 1
 
-            print(f'Batch {batch}: MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
+            print(f'Batch {batch} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
