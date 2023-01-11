@@ -6,7 +6,7 @@ from model import StockPriceModel
 
 
 if __name__ == '__main__':
-    batch_size = 2
+    batch_size = 4
     lr = 0.001
     epochs = 1
     n_news_features = 16
