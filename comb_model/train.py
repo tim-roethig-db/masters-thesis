@@ -59,7 +59,7 @@ if __name__ == '__main__':
             y = y[:, 0, :].to(device)
 
             # get prediction
-            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect)
+            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
 
             # compute loss
             batch_loss = loss(y_pred, y)
