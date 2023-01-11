@@ -10,6 +10,8 @@ if __name__ == '__main__':
     lr = 0.001
     epochs = 10
     n_news_features = 16
+    lstm_n_layers = 2
+    lstm_hidden_size = n_news_features + 1
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -23,7 +25,11 @@ if __name__ == '__main__':
     print(f'Series length: {len(train_set)}')
 
     print('Loaded model to device...')
-    model = StockPriceModel(n_news_features=n_news_features).float()
+    model = StockPriceModel(
+        n_news_features=n_news_features,
+        lstm_n_layers=lstm_n_layers,
+        lstm_hidden_size=lstm_hidden_size
+    ).float()
     model = model.to(device)
 
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -45,7 +51,8 @@ if __name__ == '__main__':
         epoch_monitor_loss = 0
 
         # reset state every epoch
-        state = None
+        h = torch.zeros(lstm_n_layers, batch_size, lstm_hidden_size).to(device)
+        c = torch.zeros(lstm_n_layers, batch_size, lstm_hidden_size).to(device)
 
         # iter over batches
         batch = 0
@@ -59,7 +66,10 @@ if __name__ == '__main__':
             y = y[:, 0, :].to(device)
 
             # get prediction
-            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
+            y_pred, (h, c) = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, (h, c))
+
+            h = h.detach()
+            c = c.detach()
 
             # compute loss
             batch_loss = loss(y_pred, y)
@@ -69,12 +79,12 @@ if __name__ == '__main__':
 
             # perform gradient step
             model.zero_grad()
-            batch_loss.backward()
+            batch_loss.backward(retain_graph=True)
             optimizer.step()
 
             batch += 1
 
-            #print(f'Batch {batch} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
+            print(f'Batch {batch} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 

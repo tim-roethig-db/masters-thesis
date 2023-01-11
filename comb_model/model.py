@@ -4,7 +4,7 @@ from transformers import BertModel
 
 
 class StockPriceModel(nn.Module):
-    def __init__(self, n_news_features: int):
+    def __init__(self, n_news_features: int, lstm_n_layers: int, lstm_hidden_size: int):
         super(StockPriceModel, self).__init__()
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -19,8 +19,8 @@ class StockPriceModel(nn.Module):
 
         self.lstm = nn.LSTM(
             input_size=n_news_features + 1,
-            hidden_size=n_news_features + 1,
-            num_layers=2,
+            hidden_size=lstm_hidden_size,
+            num_layers=lstm_n_layers,
             batch_first=True,
         )
 
@@ -44,10 +44,10 @@ class StockPriceModel(nn.Module):
         x = torch.cat((stock_price, news_feature_vect), dim=2)
 
         # run lstm
-        y, state = self.lstm(x, state)
+        y, (h, c) = self.lstm(x, state)
         y = self.linear(y[:, -1, :])
 
-        return y, state
+        return y, (h, c)
 
 
 if __name__ == '__main__':
