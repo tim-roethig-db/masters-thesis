@@ -12,6 +12,7 @@ if __name__ == '__main__':
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    print(f'Using device: {device}')
 
     print('Set up Data Loader...')
     price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
@@ -53,8 +54,7 @@ if __name__ == '__main__':
             y = y[:, 0, :].to(device)
 
             # get prediction
-            state = None
-            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, state)
+            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price)
 
             # compute loss
             batch_loss = loss(y_pred, y)
