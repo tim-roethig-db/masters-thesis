@@ -68,7 +68,6 @@ if __name__ == '__main__':
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
 
             state = [x.detach() for x in state]
-            state = None
 
             # compute loss
             batch_loss = loss(y_pred, y)
@@ -84,6 +83,11 @@ if __name__ == '__main__':
             batch += 1
 
             print(f'Batch {batch} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
+
+            if device == 'cuda':
+                print('sdfsfsd')
+                torch.cuda.empty_cache()
+
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
