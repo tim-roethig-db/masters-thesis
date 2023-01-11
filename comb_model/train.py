@@ -6,7 +6,7 @@ from model import StockPriceModel
 
 
 if __name__ == '__main__':
-    batch_size = 2
+    batch_size = 1
     lr = 0.001
     epochs = 10
     n_news_features = 16
@@ -54,8 +54,7 @@ if __name__ == '__main__':
         state = None
 
         # iter over batches
-        batch = 0
-        for x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp in train_loader:
+        for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
@@ -80,12 +79,7 @@ if __name__ == '__main__':
             batch_loss.backward()
             optimizer.step()
 
-            batch += 1
-
-            print(f'Batch {batch} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
-
-            if device.type == 'cuda':
-                torch.cuda.empty_cache()
+            #print(f'Batch {batch_idx} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
