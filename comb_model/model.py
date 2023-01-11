@@ -49,6 +49,11 @@ class StockPriceModel(nn.Module):
 
         return y, (h, c)
 
+    def init_hidden(self, device, lstm_n_layers: int, batch_size: int, lstm_hidden_size: int):
+        h0 = torch.zeros(lstm_n_layers, batch_size, lstm_hidden_size).to(device)
+        c0 = torch.zeros(lstm_n_layers, batch_size, lstm_hidden_size).to(device)
+        return h0, c0
+
 
 if __name__ == '__main__':
     batch_size = 16

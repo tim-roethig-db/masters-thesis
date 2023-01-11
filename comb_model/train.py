@@ -51,8 +51,12 @@ if __name__ == '__main__':
         epoch_monitor_loss = 0
 
         # reset state every epoch
-        h = torch.zeros(lstm_n_layers, batch_size, lstm_hidden_size).to(device)
-        c = torch.zeros(lstm_n_layers, batch_size, lstm_hidden_size).to(device)
+        h, c = model.init_hidden(
+            device=device,
+            lstm_n_layers=lstm_n_layers,
+            batch_size=batch_size,
+            lstm_hidden_size=lstm_hidden_size
+        )
 
         # iter over batches
         batch = 0
