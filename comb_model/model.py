@@ -14,7 +14,7 @@ class StockPriceModel(nn.Module):
 
         self.text_feature_ext = nn.Sequential(
             nn.Linear(768, n_news_features),
-            nn.ReLU()
+            nn.Tanh()
         )
 
         self.lstm = nn.LSTM(

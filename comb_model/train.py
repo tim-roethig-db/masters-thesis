@@ -6,7 +6,7 @@ from model import StockPriceModel
 
 
 if __name__ == '__main__':
-    batch_size = 2
+    batch_size = 8
     lr = 0.001
     epochs = 1
 
@@ -19,6 +19,7 @@ if __name__ == '__main__':
     news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
     train_set = Dataset(news_df, price_df, seq_len=30, test_len=5)
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
+    print(f'Series length: {len(train_set)}')
 
     print('Loaded model to device...')
     model = StockPriceModel(n_news_features=32).float()
@@ -46,6 +47,7 @@ if __name__ == '__main__':
         state = None
 
         # iter over batches
+        batch = 0
         for x_news_input_ids, x_news_attention_mask, x_price, y in train_loader:
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
@@ -67,9 +69,11 @@ if __name__ == '__main__':
             batch_loss.backward()
             optimizer.step()
 
-            print(f'Batch MSELoss: {(batch_loss/batch_size):.5f} and MAELoss: {batch_monitor_loss/batch_size:.5f}')
+            batch += 1
 
-        print(f'EPOCH: {epoch} of {epochs} with MSELoss: {epoch_loss/len(train_set):.5f} and MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
+            print(f'Batch {batch}: MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
+
+        print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
     print('Save model...')
     torch.save(model.state_dict(), 'lstm.t7')

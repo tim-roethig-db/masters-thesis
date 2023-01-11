@@ -17,6 +17,7 @@ if __name__ == '__main__':
     df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';')#.sample(frac=1).head(4)
     train_set = Dataset(df, seq_len=30)
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
+    print(f'Series length: {len(train_set)}')
 
     print('Loaded model to device...')
     model = LSTMStockPriceModel().float()
@@ -35,7 +36,7 @@ if __name__ == '__main__':
     loss = torch.nn.MSELoss(reduction='sum').to(device)
     monitor_loss = torch.nn.L1Loss()
 
-    # train loop
+    print('Start train loop...')
     for epoch in range(1, epochs+1):
         epoch_loss = 0
         epoch_monitor_loss = 0
