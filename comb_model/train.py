@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
             print(f'Batch {batch} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
 
-            if device == 'cuda':
+            if device is torch.device('cuda'):
                 print('sdfsfsd')
                 torch.cuda.empty_cache()
 
