@@ -6,6 +6,7 @@ from transformers import BertModel
 class StockPriceModel(nn.Module):
     def __init__(self, n_news_features: int):
         super(StockPriceModel, self).__init__()
+        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
         self.n_news_features = n_news_features
 
@@ -29,6 +30,7 @@ class StockPriceModel(nn.Module):
         # apply news processing for days with news
         # else fill with zeros
         news_feature_vect = torch.zeros(size=(stock_price.shape[0], stock_price.shape[1], self.n_news_features))
+        news_feature_vect = news_feature_vect.to(self.device)
         for i in range(news_feature_vect.shape[1]):
             # if there is any input (>2 means more tokens than BOT and EOT)
             if news_input_ids[:, i, :].sum() > 0:
