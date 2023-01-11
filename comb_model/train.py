@@ -85,9 +85,8 @@ if __name__ == '__main__':
             print(f'Batch {batch} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
 
             if device.type == 'cuda':
-                print('sdfsfsd')
                 torch.cuda.empty_cache()
-            
+
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
     print('Save model...')
