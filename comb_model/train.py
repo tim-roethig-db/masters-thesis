@@ -68,6 +68,7 @@ if __name__ == '__main__':
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
 
             state = [x.detach() for x in state]
+            state = None
 
             # compute loss
             batch_loss = loss(y_pred, y)
