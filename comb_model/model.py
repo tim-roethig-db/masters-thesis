@@ -44,15 +44,10 @@ class StockPriceModel(nn.Module):
         x = torch.cat((stock_price, news_feature_vect), dim=2)
 
         # run lstm
-        y, (h, c) = self.lstm(x, state)
+        y, state = self.lstm(x, state)
         y = self.linear(y[:, -1, :])
 
-        return y, (h, c)
-
-    def init_hidden(self, device, lstm_n_layers: int, batch_size: int, lstm_hidden_size: int):
-        h0 = torch.zeros(lstm_n_layers, batch_size, lstm_hidden_size).to(device)
-        c0 = torch.zeros(lstm_n_layers, batch_size, lstm_hidden_size).to(device)
-        return h0, c0
+        return y, state
 
 
 if __name__ == '__main__':

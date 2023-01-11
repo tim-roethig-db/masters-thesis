@@ -51,12 +51,7 @@ if __name__ == '__main__':
         epoch_monitor_loss = 0
 
         # reset state every epoch
-        h, c = model.init_hidden(
-            device=device,
-            lstm_n_layers=lstm_n_layers,
-            batch_size=batch_size,
-            lstm_hidden_size=lstm_hidden_size
-        )
+        state = None
 
         # iter over batches
         batch = 0
@@ -70,10 +65,9 @@ if __name__ == '__main__':
             y = y[:, 0, :].to(device)
 
             # get prediction
-            y_pred, (h, c) = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, (h, c))
+            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
 
-            h = h.detach()
-            c = c.detach()
+            state = [x.detach() for x in state]
 
             # compute loss
             batch_loss = loss(y_pred, y)
