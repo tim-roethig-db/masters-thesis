@@ -10,15 +10,15 @@ pd.set_option('expand_frame_repr', False)
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, news_df: pd.DataFrame, price_df: pd.DataFrame, seq_len: int = 30, test_len: int = 5):
+    def __init__(self, company: str, news_df: pd.DataFrame, price_df: pd.DataFrame, seq_len: int = 30, test_len: int = 5):
         self.dtype = 'float32'
         self.seq_len = seq_len
         self.test_len = test_len
         self.tokenizer = BertTokenizer.from_pretrained('../models/bert-base-uncased')
 
-        price_df = price_df.loc['salzgitter ag']
+        price_df = price_df.loc[company]
 
-        news_df = news_df.loc['salzgitter ag']
+        news_df = news_df.loc[company]
         news_df = news_df['title'].dropna()
         news_df = news_df.groupby(['time_stamp']).apply(lambda x: ' '.join(x.values))
 

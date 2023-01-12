@@ -49,6 +49,10 @@ class StockPriceModel(nn.Module):
 
         return y, state
 
+    def reset_lstm(self):
+        self.lstm.reset_parameters()
+        self.linear.reset_parameters()
+
 
 if __name__ == '__main__':
     batch_size = 16

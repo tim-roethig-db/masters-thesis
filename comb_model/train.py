@@ -8,7 +8,7 @@ from model import StockPriceModel
 if __name__ == '__main__':
     batch_size = 1
     lr = 0.001
-    epochs = 10
+    epochs = 1
     n_news_features = 16
     lstm_n_layers = 2
     lstm_hidden_size = n_news_features + 1
@@ -16,13 +16,6 @@ if __name__ == '__main__':
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     print(f'Using device: {device}')
-
-    print('Set up Data Loader...')
-    price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
-    news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
-    train_set = Dataset(news_df, price_df, seq_len=30, test_len=5)
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
-    print(f'Series length: {len(train_set)}')
 
     print('Loaded model to device...')
     model = StockPriceModel(
@@ -45,43 +38,66 @@ if __name__ == '__main__':
     loss = torch.nn.MSELoss(reduction='sum').to(device)
     monitor_loss = torch.nn.L1Loss()
 
-    print('Start train loop...')
-    for epoch in range(1, epochs+1):
-        epoch_loss = 0
-        epoch_monitor_loss = 0
+    print('Start training...')
+    price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
+    news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
 
-        # reset state every epoch
-        state = None
+    companys = sorted(list(set(price_df.index.get_level_values(0))))
+    for company in companys:
+        if not price_df.loc[company].isnull().values.any():
+            print(f'Start training for {company}...')
 
-        # iter over batches
-        for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
-            # move data to device
-            x_news_input_ids = x_news_input_ids.to(device)
-            x_news_attention_mask = x_news_attention_mask.to(device)
-            x_price = x_price.to(device)
-            news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
-            news_feature_vect = news_feature_vect.to(device)
-            y = y[:, 0, :].to(device)
+            print('Reset LSTM parameters...')
+            model.reset_lstm()
 
-            # get prediction
-            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
+            print('Set up Data Loader...')
+            train_set = Dataset(
+                company=company,
+                news_df=news_df,
+                price_df=price_df,
+                seq_len=30,
+                test_len=5
+            )
+            train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
+            print(f'Series length: {len(train_set)}')
 
-            state = [x.detach() for x in state]
+            print('Start train loop...')
+            for epoch in range(1, epochs+1):
+                epoch_loss = 0
+                epoch_monitor_loss = 0
 
-            # compute loss
-            batch_loss = loss(y_pred, y)
-            epoch_loss += batch_loss
-            batch_monitor_loss = monitor_loss(y_pred, y)
-            epoch_monitor_loss += batch_monitor_loss
+                # reset state every epoch
+                state = None
 
-            # perform gradient step
-            model.zero_grad()
-            batch_loss.backward()
-            optimizer.step()
+                # iter over batches
+                for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
+                    # move data to device
+                    x_news_input_ids = x_news_input_ids.to(device)
+                    x_news_attention_mask = x_news_attention_mask.to(device)
+                    x_price = x_price.to(device)
+                    news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
+                    news_feature_vect = news_feature_vect.to(device)
+                    y = y[:, 0, :].to(device)
 
-            #print(f'Batch {batch_idx} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
+                    # get prediction
+                    y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
 
-        print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
+                    state = [x.detach() for x in state]
 
-    print('Save model...')
-    torch.save(model.state_dict(), 'lstm.t7')
+                    # compute loss
+                    batch_loss = loss(y_pred, y)
+                    epoch_loss += batch_loss
+                    batch_monitor_loss = monitor_loss(y_pred, y)
+                    epoch_monitor_loss += batch_monitor_loss
+
+                    # perform gradient step
+                    model.zero_grad()
+                    batch_loss.backward()
+                    optimizer.step()
+
+                    #print(f'Batch {batch_idx} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
+
+                print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
+
+            print('Save model...')
+            torch.save(model.state_dict(), 'lstm.t7')
