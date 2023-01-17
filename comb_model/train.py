@@ -103,9 +103,10 @@ if __name__ == '__main__':
             batch_loss.backward()
             optimizer.step()
 
-            if batch_idx+1 % 10 == 0:
+            p = 25
+            if batch_idx+1 % p == 0:
                 batch_monitor_loss += monitor_loss
-                print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/10:.5f}')
+                print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/p:.5f}')
                 batch_monitor_loss = 0
                 t_min = time_stamp.min() + 1
             else:
