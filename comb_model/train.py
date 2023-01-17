@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     print('Setup loss function...')
     loss = torch.nn.MSELoss(reduction='sum').to(device)
-    monitor_loss = torch.nn.L1Loss()
+    mae_loss = torch.nn.L1Loss()
 
     print('Start training...')
     price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
@@ -71,6 +71,8 @@ if __name__ == '__main__':
     for epoch in range(1, epochs+1):
         epoch_loss = 0
         epoch_monitor_loss = 0
+        batch_monitor_loss = 0
+        t_min = 0
 
         # reset state every epoch
         state = None
@@ -93,15 +95,21 @@ if __name__ == '__main__':
             # compute loss
             batch_loss = loss(y_pred, y)
             epoch_loss += batch_loss
-            batch_monitor_loss = monitor_loss(y_pred, y)
-            epoch_monitor_loss += batch_monitor_loss
+            monitor_loss = mae_loss(y_pred, y)
+            epoch_monitor_loss += monitor_loss
 
             # perform gradient step
             model.zero_grad()
             batch_loss.backward()
             optimizer.step()
 
-            print(f'Batch {batch_idx} ({time_stamp.min()} to {time_stamp.max()}): MSELoss: {(batch_loss/batch_size):.5f}, MAELoss: {batch_monitor_loss/batch_size:.5f}')
+            if batch_idx % 10 == 0:
+                batch_monitor_loss += monitor_loss
+                print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/10:.5f}')
+                batch_monitor_loss = 0
+                t_min = time_stamp.min() + 1
+            else:
+                batch_monitor_loss += monitor_loss
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
