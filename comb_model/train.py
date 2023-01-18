@@ -43,7 +43,7 @@ if __name__ == '__main__':
     print('Start training...')
     #price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
     #news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
-    df = pd.read_csv('data/dataset.csv', sep=';', index_col='time_stamp')
+    df = pd.read_csv('../data/dataset.csv', sep=';', index_col='time_stamp')
 
     #companys = sorted(list(set(price_df.index.get_level_values(0))))
     #for company in companys:
