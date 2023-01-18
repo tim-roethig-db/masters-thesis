@@ -86,7 +86,6 @@ if __name__ == '__main__':
             x_price = x_price.to(device)
             news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
             news_feature_vect = news_feature_vect.to(device)
-            news_feature_vect = None
             y = y[:, 0, :].to(device)
 
             # get prediction
