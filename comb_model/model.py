@@ -46,13 +46,17 @@ class StockPriceModel(nn.Module):
                 feature_vect = torch.zeros((1, self.n_news_features))
                 print(feature_vect.shape)
         """
+        """
         comp_feature_vect = None
+        print(news_input_ids.shape)
+        print(news_input_ids[:, 3, :].shape)
         for i in range(news_input_ids.shape[1]):
             last_hidden_state, pooler_output = self.bert(
                 input_ids=news_input_ids[:, i, :],
                 attention_mask=news_attention_mask[:, i, :],
                 return_dict=False
             )
+            print(pooler_output.shape)
 
             feature_vect = self.text_feature_ext(pooler_output)[:, None, :]
 
@@ -60,6 +64,16 @@ class StockPriceModel(nn.Module):
                 comp_feature_vect = feature_vect
             else:
                 comp_feature_vect = torch.cat((comp_feature_vect, feature_vect), dim=1)
+        print(comp_feature_vect.shape)
+        """
+        last_hidden_state, pooler_output = self.bert(
+            input_ids=news_input_ids[0, :, :],
+            attention_mask=news_attention_mask[0, :, :],
+            return_dict=False
+        )
+        print(pooler_output.shape)
+        comp_feature_vect = self.text_feature_ext(pooler_output)[None, :, :]
+        print(comp_feature_vect.shape)
 
 
         # cat price with news features
