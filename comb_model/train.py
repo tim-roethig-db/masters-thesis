@@ -93,7 +93,7 @@ if __name__ == '__main__':
             #y_pred = torch.zeros(1)
             #state = None
 
-            #state = [x.detach() for x in state]
+            state = [x.detach() for x in state]
 
             # compute loss
             batch_loss = loss(y_pred, y)
