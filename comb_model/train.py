@@ -84,7 +84,7 @@ if __name__ == '__main__':
         state = None
 
         # iter over batches
-        for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
+        for x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp in train_loader:
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
@@ -109,7 +109,7 @@ if __name__ == '__main__':
             model.zero_grad()
             batch_loss.backward()
             optimizer.step()
-
+            """
             p = 100
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                 gc.collect()
             else:
                 batch_monitor_loss += monitor_loss
-
+            """
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
