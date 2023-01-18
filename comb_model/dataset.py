@@ -97,7 +97,7 @@ class Dataset(torch.utils.data.Dataset):
 
         time_stamp = self.x[idx:(idx+self.seq_len), 2].astype(int)
 
-        return x_news_input_ids, x_news_attention_mask, x_price, y
+        return x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp
 
     def __len__(self):
         return len(self.x) - self.seq_len
