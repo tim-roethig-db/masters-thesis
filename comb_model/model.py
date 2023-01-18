@@ -7,7 +7,8 @@ class StockPriceModel(nn.Module):
     def __init__(self, n_news_features: int, lstm_n_layers: int, lstm_hidden_size: int):
         super(StockPriceModel, self).__init__()
 
-        self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
+        #self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
+        self.bert = BertModel.from_pretrained('bert-base-uncased')
 
         self.text_feature_ext = nn.Sequential(
             nn.Linear(768, n_news_features),
