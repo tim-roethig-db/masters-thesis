@@ -77,7 +77,7 @@ if __name__ == '__main__':
         t_min = 0
 
         # reset state every epoch
-        state = None
+        #state = None
 
         # iter over batches
         for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
@@ -90,7 +90,7 @@ if __name__ == '__main__':
             y = y[:, 0, :].to(device)
 
             # get prediction
-            y_pred = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
+            y_pred = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, None)
             #y_pred = torch.zeros(1)
 
 

@@ -44,7 +44,7 @@ class StockPriceModel(nn.Module):
         x = torch.cat((stock_price, news_feature_vect), dim=2)
 
         # run lstm
-        y, state = self.lstm(x, state)
+        y, _ = self.lstm(x, state)
         y = self.linear(y[:, -1, :])
 
         return y
