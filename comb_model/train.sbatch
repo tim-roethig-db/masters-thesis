@@ -26,10 +26,10 @@
 
 
 # After J, specify name of the job to avoid confusion
-#SBATCH --error=job.%J_train.err
+#SBATCH --error=train.err
 # write the error output to job.*jobID*.err
 
-#SBATCH --output=job.%J_train.out
+#SBATCH --output=train.out
 # write the standard output to job.*jobID*.out
 
 #SBATCH --mail-type=ALL
