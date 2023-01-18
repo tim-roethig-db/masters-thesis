@@ -82,6 +82,7 @@ if __name__ == '__main__':
 
         # iter over batches
         for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
+            torch.cuda.memory_summary()
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
