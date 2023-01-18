@@ -42,6 +42,7 @@
 #b) copy all needed data in zip format to the jobs scratch folder and unzip it there
 ####
 echo Start copying...
+zip -r /home/mollik/masters_thesis/data.zip /home/mollik/masters_thesis/data
 cp /home/mollik/masters_thesis/data.zip /scratch/$SLURM_JOB_ID/
 echo Change directory...
 cd /scratch/$SLURM_JOB_ID/
