@@ -14,9 +14,9 @@ if __name__ == '__main__':
     batch_size = 1
     lr = 0.0001
     epochs = 2
-    n_news_features = 16
+    n_news_features = 2
     lstm_n_layers = 1
-    lstm_hidden_size = 9
+    lstm_hidden_size = 2
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -90,7 +90,6 @@ if __name__ == '__main__':
             x_news_attention_mask = x_news_attention_mask.to(device)
             x_price = x_price.to(device)
             news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features)).to(device)
-            #news_feature_vect = news_feature_vect
             y = y.to(device)
 
             # get prediction
