@@ -91,7 +91,7 @@ if __name__ == '__main__':
             x_price = x_price.to(device)
             news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
             news_feature_vect = news_feature_vect.to(device)
-            y = y[:, 0, :].to(device)
+            y = y.to(device)
 
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
@@ -100,9 +100,9 @@ if __name__ == '__main__':
             state = [x.detach() for x in state]
 
             # compute loss
-            batch_loss = loss(y_pred, y)
+            batch_loss = loss(y_pred, y[:, 0, :])
             epoch_loss += batch_loss
-            monitor_loss = mae_loss(y_pred, y)
+            monitor_loss = mae_loss(y_pred, y[:, 0, :])
             epoch_monitor_loss += monitor_loss
 
             # perform gradient step
