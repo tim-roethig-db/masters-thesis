@@ -42,7 +42,8 @@ class StockPriceModel(nn.Module):
                 news_feature_vect[:, i, :] = self.text_feature_ext(pooler_output)
         """
         # cat price with news features
-        x = torch.cat((stock_price, news_feature_vect), dim=2)
+        #x = torch.cat((stock_price, news_feature_vect), dim=2)
+        x = stock_price
 
         # run lstm
         y, state = self.lstm(x, state)

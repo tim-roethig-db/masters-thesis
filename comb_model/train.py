@@ -9,7 +9,7 @@ if __name__ == '__main__':
     batch_size = 1
     lr = 0.0001
     epochs = 1
-    n_news_features = 16
+    n_news_features = 0
     lstm_n_layers = 2
     lstm_hidden_size = n_news_features + 1
 
@@ -84,8 +84,9 @@ if __name__ == '__main__':
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
             x_price = x_price.to(device)
-            news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
-            news_feature_vect = news_feature_vect.to(device)
+            #news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
+            #news_feature_vect = news_feature_vect.to(device)
+            news_feature_vect = None
             y = y[:, 0, :].to(device)
 
             # get prediction
