@@ -14,9 +14,9 @@ if __name__ == '__main__':
     batch_size = 1
     lr = 0.0001
     epochs = 2
-    n_news_features = 2
+    n_news_features = 16
     lstm_n_layers = 1
-    lstm_hidden_size = 2
+    lstm_hidden_size = 8
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')

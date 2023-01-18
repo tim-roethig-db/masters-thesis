@@ -56,7 +56,7 @@ class Dataset_old(torch.utils.data.Dataset):
             x = self.tokenizer(
                 x,
                 padding='max_length',
-                max_length=256,
+                max_length=515,
                 truncation=True,
                 return_tensors='pt',
                 return_token_type_ids=False
