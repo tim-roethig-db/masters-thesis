@@ -91,9 +91,9 @@ if __name__ == '__main__':
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
             #y_pred = torch.zeros(1)
-            state = None
+            #state = None
 
-            #state = [x.detach() for x in state]
+            state = [x.detach() for x in state]
 
             # compute loss
             batch_loss = loss(y_pred, y)
@@ -110,7 +110,7 @@ if __name__ == '__main__':
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
                 print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/p:.5f}')
-                loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/p).item()])
+                #loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/p).item()])
 
                 batch_monitor_loss = 0
                 t_min = time_stamp.min() + 1
