@@ -84,7 +84,7 @@ if __name__ == '__main__':
         state = None
 
         # iter over batches
-        for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
+        for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y) in enumerate(train_loader):
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
@@ -117,11 +117,11 @@ if __name__ == '__main__':
             p = 100
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
-                print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/p:.5f}')
+                #print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/p:.5f}')
                 loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/p).item()])
 
                 batch_monitor_loss = 0
-                t_min = time_stamp.min() + 1
+                #t_min = time_stamp.min() + 1
                 gc.collect()
             else:
                 batch_monitor_loss += monitor_loss
