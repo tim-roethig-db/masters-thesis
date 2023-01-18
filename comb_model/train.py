@@ -84,22 +84,21 @@ if __name__ == '__main__':
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
             x_price = x_price.to(device)
-            #news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
-            #news_feature_vect = news_feature_vect.to(device)
+            news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features))
+            news_feature_vect = news_feature_vect.to(device)
             news_feature_vect = None
             y = y[:, 0, :].to(device)
 
             # get prediction
-            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, None)
+            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
             #y_pred = torch.zeros(1)
 
 
-            #state = [x.detach() for x in state]
+            state = [x.detach() for x in state]
 
             # compute loss
             batch_loss = loss(y_pred, y)
             epoch_loss += batch_loss
-            print(epoch_loss)
             monitor_loss = mae_loss(y_pred, y)
             epoch_monitor_loss += monitor_loss
 
@@ -112,7 +111,7 @@ if __name__ == '__main__':
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
                 print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/p:.5f}')
-                #loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/p).item()])
+                loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/p).item()])
 
                 batch_monitor_loss = 0
                 t_min = time_stamp.min() + 1
