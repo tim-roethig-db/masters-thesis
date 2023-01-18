@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     print('Setup loss function...')
     loss = torch.nn.MSELoss(reduction='sum').to(device)
-    mae_loss = torch.nn.L1Loss()#.to(device)
+    mae_loss = torch.nn.L1Loss().to(device)
 
     print('Start training...')
     #price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
