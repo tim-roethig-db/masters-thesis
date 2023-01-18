@@ -44,7 +44,7 @@ if __name__ == '__main__':
     print('Start training...')
     #price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
     #news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
-    df = pd.read_csv('../data/dataset.csv', sep=';', index_col='time_stamp')
+    df = pd.read_csv('data/dataset.csv', sep=';', index_col='time_stamp')
 
     #companys = sorted(list(set(price_df.index.get_level_values(0))))
     #for company in companys:
@@ -84,12 +84,13 @@ if __name__ == '__main__':
         # iter over batches
         for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
             if torch.cuda.is_available():
-                nvmlInit()
-                h = nvmlDeviceGetHandleByIndex(0)
-                info = nvmlDeviceGetMemoryInfo(h)
-                print(f'total    : {info.total}')
-                print(f'free     : {info.free}')
-                print(f'used     : {info.used}')
+                for i in range(4):
+                    nvmlInit()
+                    h = nvmlDeviceGetHandleByIndex(i)
+                    info = nvmlDeviceGetMemoryInfo(h)
+                    print(f'{i}_total: {info.total}')
+                    print(f'{i}_free : {info.free}')
+                    print(f'{i}_used : {info.used}')
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
