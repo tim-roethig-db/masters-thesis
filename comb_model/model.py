@@ -47,7 +47,7 @@ class StockPriceModel(nn.Module):
         y, state = self.lstm(x, state)
         y = self.linear(y[:, -1, :])
 
-        return y, state
+        return y
 
     def reset_lstm(self):
         self.lstm.reset_parameters()
