@@ -2,6 +2,7 @@ import pandas as pd
 import torch
 import os
 import ctypes
+import gc
 import ctypes.util
 libc = ctypes.CDLL(ctypes.util.find_library('c'))
 
@@ -86,7 +87,6 @@ if __name__ == '__main__':
 
         # iter over batches
         for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
-            model.reset_lstm()
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
@@ -123,6 +123,7 @@ if __name__ == '__main__':
                 t_min = time_stamp.min() + 1
             else:
                 batch_monitor_loss += monitor_loss
+            gc.collect()
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
