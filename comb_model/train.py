@@ -3,8 +3,6 @@ import torch
 import os
 import ctypes
 import gc
-import ctypes.util
-libc = ctypes.CDLL(ctypes.util.find_library('c'))
 
 from dataset import Dataset
 from model import StockPriceModel
@@ -56,7 +54,7 @@ if __name__ == '__main__':
     #print(f'Start training for {company}...')
 
     print('Reset LSTM parameters...')
-    model.reset_lstm()
+    #model.reset_lstm()
 
     print('Set up Data Loader...')
     #train_set = Dataset(
@@ -98,7 +96,6 @@ if __name__ == '__main__':
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
             #y_pred = torch.zeros(1)
-            libc.malloc_trim(ctypes.c_int(0))
 
             state = [x.detach() for x in state]
 
@@ -121,9 +118,10 @@ if __name__ == '__main__':
 
                 batch_monitor_loss = 0
                 t_min = time_stamp.min() + 1
+                gc.collect()
             else:
                 batch_monitor_loss += monitor_loss
-            gc.collect()
+
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
