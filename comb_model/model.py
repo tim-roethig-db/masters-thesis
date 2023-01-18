@@ -8,8 +8,8 @@ class StockPriceModel(nn.Module):
         super(StockPriceModel, self).__init__()
         self.n_news_features = n_news_features
 
-        #self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
-        self.bert = BertModel.from_pretrained('bert-base-uncased')
+        self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
+        #self.bert = BertModel.from_pretrained('bert-base-uncased')
 
         self.text_feature_ext = nn.Sequential(
             nn.Linear(768, n_news_features),
