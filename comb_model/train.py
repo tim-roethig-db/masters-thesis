@@ -96,7 +96,7 @@ if __name__ == '__main__':
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
             print(y_pred)
-            #
+            #y_pred = torch.zeros((1, 1)).to(device)
             print(y_pred)
             #state = None
 
@@ -109,11 +109,9 @@ if __name__ == '__main__':
             epoch_monitor_loss += monitor_loss
 
             # perform gradient step
-            model.zero_grad()
-            batch_loss.backward()
-            optimizer.step()
-
-            y_pred = torch.zeros((1, 1)).to(device)
+            #model.zero_grad()
+            #batch_loss.backward()
+            #optimizer.step()
 
             p = 100
             if (batch_idx+1) % p == 0:
