@@ -17,7 +17,7 @@ if __name__ == '__main__':
     epochs = 1
     n_news_features = 1
     lstm_n_layers = 1
-    lstm_hidden_size = n_news_features + 1
+    lstm_hidden_size = n_news_features
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
