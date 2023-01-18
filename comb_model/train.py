@@ -111,8 +111,8 @@ if __name__ == '__main__':
             # perform gradient step
             model.zero_grad()
             #batch_loss.backward()
-            #optimizer.step()
-            torch.cuda.empty_cache()
+            optimizer.step()
+            #torch.cuda.empty_cache()
 
             p = 100
             if (batch_idx+1) % p == 0:
