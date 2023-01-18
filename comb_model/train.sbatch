@@ -56,6 +56,6 @@ echo Execute training...
 ####
 
 # Uncomment to enable sbatch file
-singularity exec --nv /common/singularityImages/default.simg /home/mollik/miniconda3/envs/inpainting/bin/python train.py
+singularity exec --nv /common/singularityImages/default.simg /home/mollik/miniconda3/envs/inpainting/bin/python /home/mollik/masters_thesis/comb_model/train.py
 
 echo DONE!
