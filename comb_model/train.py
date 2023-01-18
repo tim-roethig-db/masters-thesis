@@ -111,6 +111,8 @@ if __name__ == '__main__':
             model.zero_grad()
             batch_loss.backward(retain_graph=False)
             optimizer.step()
+            del y_pred
+            gc.collect()
             #torch.cuda.empty_cache()
 
             p = 100
