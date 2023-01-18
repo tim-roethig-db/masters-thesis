@@ -7,7 +7,7 @@ from model import LSTMStockPriceModel
 
 if __name__ == '__main__':
     batch_size = 16
-    lr = 0.001
+    lr = 0.0001
     epochs = 100
 
     # set device to cuda if available

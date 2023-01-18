@@ -68,6 +68,7 @@ if __name__ == '__main__':
     print(f'Series length: {len(train_set)}')
 
     print('Start train loop...')
+    loss_df = list()
     for epoch in range(1, epochs+1):
         epoch_loss = 0
         epoch_monitor_loss = 0
@@ -89,8 +90,10 @@ if __name__ == '__main__':
 
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
+            #y_pred = torch.zeros(1)
+            #state = None
 
-            state = [x.detach() for x in state]
+            #state = [x.detach() for x in state]
 
             # compute loss
             batch_loss = loss(y_pred, y)
@@ -99,14 +102,16 @@ if __name__ == '__main__':
             epoch_monitor_loss += monitor_loss
 
             # perform gradient step
-            model.zero_grad()
-            batch_loss.backward()
-            optimizer.step()
+            #model.zero_grad()
+            #batch_loss.backward()
+            #optimizer.step()
 
             p = 100
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
                 print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/p:.5f}')
+                loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/p).item()])
+
                 batch_monitor_loss = 0
                 t_min = time_stamp.min() + 1
             else:
@@ -114,5 +119,12 @@ if __name__ == '__main__':
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
-        print('Save model...')
-        torch.save(model.state_dict(), 'lstm.t7')
+    print('Save loss history...')
+    loss_df = pd.DataFrame(
+        columns=['epoch', 'iteration', 'MAE'],
+        data=loss_df
+    )
+    loss_df.to_csv(f"loss_lr_{lr}_epoch_{epochs}.csv", index=False, sep=';')
+
+    print('Save model...')
+    torch.save(model.state_dict(), 'lstm.t7')
