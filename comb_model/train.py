@@ -41,11 +41,11 @@ if __name__ == '__main__':
 
     print('Setup loss function...')
     loss = torch.nn.MSELoss(reduction='sum').to(device)
-    mae_loss = torch.nn.L1Loss()
+    mae_loss = torch.nn.L1Loss()#.to(device)
 
     print('Start training...')
-    price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
-    news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
+    #price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
+    #news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
     df = pd.read_csv('../data/dataset.csv', sep=';', index_col='time_stamp')
 
     #companys = sorted(list(set(price_df.index.get_level_values(0))))
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     #    if not price_df.loc[company].isnull().values.any():
     #print(f'Start training for {company}...')
 
-    print('Reset LSTM parameters...')
+    #print('Reset LSTM parameters...')
     #model.reset_lstm()
 
     print('Set up Data Loader...')
@@ -109,7 +109,7 @@ if __name__ == '__main__':
             model.zero_grad()
             batch_loss.backward()
             optimizer.step()
-            """
+
             p = 100
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                 gc.collect()
             else:
                 batch_monitor_loss += monitor_loss
-            """
+
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
