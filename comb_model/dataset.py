@@ -76,8 +76,8 @@ class Dataset(torch.utils.data.Dataset):
         self.dtype = 'float32'
         self.seq_len = seq_len
         self.test_len = test_len
-        self.tokenizer = BertTokenizer.from_pretrained('../models/bert-base-uncased')
-        #self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        #self.tokenizer = BertTokenizer.from_pretrained('../models/bert-base-uncased')
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
         df['title'] = df['title'].apply(lambda x: self.pd_tokenizer(x))
 

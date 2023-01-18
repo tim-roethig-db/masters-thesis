@@ -1,5 +1,6 @@
 import pandas as pd
 import torch
+from pynvml import *
 
 from dataset import Dataset
 from model import StockPriceModel
@@ -82,7 +83,13 @@ if __name__ == '__main__':
 
         # iter over batches
         for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
-            torch.cuda.memory_summary()
+            if torch.cuda.is_available():
+                nvmlInit()
+                h = nvmlDeviceGetHandleByIndex(0)
+                info = nvmlDeviceGetMemoryInfo(h)
+                print(f'total    : {info.total}')
+                print(f'free     : {info.free}')
+                print(f'used     : {info.used}')
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
