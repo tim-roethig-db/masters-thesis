@@ -1,6 +1,9 @@
 import pandas as pd
 import torch
 import os
+import ctypes
+import ctypes.util
+libc = ctypes.CDLL(ctypes.util.find_library(‘c’))
 
 from dataset import Dataset
 from model import StockPriceModel
@@ -8,12 +11,7 @@ from model import StockPriceModel
 
 if __name__ == '__main__':
     torch.set_num_threads(1)
-
     print(torch.get_num_threads())
-    os.environ["OMP_NUM_THREADS"] = '1'
-    print(torch.get_num_threads())
-
-
     batch_size = 1
     lr = 0.0001
     epochs = 1
@@ -99,6 +97,7 @@ if __name__ == '__main__':
             # get prediction
             y_pred = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, None)
             #y_pred = torch.zeros(1)
+            libc.malloc_trim(ctypes.c_int(0))
 
 
             #state = [x.detach() for x in state]
