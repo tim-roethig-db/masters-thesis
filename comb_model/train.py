@@ -1,8 +1,5 @@
 import pandas as pd
 import torch
-import os
-import ctypes
-import gc
 
 from dataset import Dataset
 from model import StockPriceModel
