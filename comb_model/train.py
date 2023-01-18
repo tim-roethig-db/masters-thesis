@@ -3,7 +3,7 @@ import torch
 import os
 import ctypes
 import ctypes.util
-libc = ctypes.CDLL(ctypes.util.find_library(‘c’))
+libc = ctypes.CDLL(ctypes.util.find_library('c'))
 
 from dataset import Dataset
 from model import StockPriceModel
