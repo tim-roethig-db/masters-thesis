@@ -96,7 +96,7 @@ if __name__ == '__main__':
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
             print(y_pred)
-            y_pred = torch.zeros((1, 1)).to(device)
+            #y_pred = torch.zeros((1, 1)).to(device)
             print(y_pred)
             #state = None
 
