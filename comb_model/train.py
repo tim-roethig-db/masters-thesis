@@ -6,7 +6,7 @@ from model import StockPriceModel
 
 
 if __name__ == '__main__':
-    torch.set_num_threads(4)
+    torch.set_num_threads(1)
     batch_size = 1
     lr = 0.0001
     epochs = 1
