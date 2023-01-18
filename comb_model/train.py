@@ -107,12 +107,14 @@ if __name__ == '__main__':
             monitor_loss = mae_loss(y_pred, y[:, 0, :])
             epoch_monitor_loss += monitor_loss
 
+            del y_pred
+            gc.collect()
+
             # perform gradient step
             model.zero_grad()
             batch_loss.backward(retain_graph=False)
             optimizer.step()
-            del y_pred
-            gc.collect()
+
             #torch.cuda.empty_cache()
 
             p = 100
