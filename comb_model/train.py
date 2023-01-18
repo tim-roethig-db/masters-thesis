@@ -91,6 +91,7 @@ if __name__ == '__main__':
                     print(f'{i}_total: {info.total/1024**2}')
                     print(f'{i}_free : {info.free/1024**2}')
                     print(f'{i}_used : {info.used/1024**2}')
+                print('------------------------------------------------')
             # move data to device
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
@@ -99,10 +100,6 @@ if __name__ == '__main__':
 
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, state)
-            print(y_pred)
-            #y_pred = torch.zeros((1, 1)).to(device)
-            print(y_pred)
-            #state = None
 
             state = [x.detach() for x in state]
 
