@@ -23,7 +23,7 @@ class StockPriceModel(nn.Module):
             batch_first=True,
         )
 
-        self.linear = nn.Linear(n_news_features + 1, 1)
+        self.linear = nn.Linear(lstm_hidden_size, 1)
 
     def forward(self, news_input_ids, news_attention_mask, stock_price, news_feature_vect, state=None):
         # apply news processing for days with news
