@@ -28,7 +28,7 @@ class StockPriceModel(nn.Module):
     def forward(self, news_input_ids, news_attention_mask, stock_price, news_feature_vect, state=None):
         # apply news processing for days with news
         # else fill with zeros
-        """
+
         for i in range(news_feature_vect.shape[1]):
             # if there is any input (>2 means more tokens than BOT and EOT)
             if news_input_ids[:, i, :].sum() > 0:
@@ -42,9 +42,9 @@ class StockPriceModel(nn.Module):
 
         # cat price with news features
         x = torch.cat((stock_price, news_feature_vect), dim=2)
-        """
+
         # run lstm
-        y, state = self.lstm(stock_price, state)
+        y, state = self.lstm(x, state)
         y = self.linear(y[:, -1, :])
 
         return y, state

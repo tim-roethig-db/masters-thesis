@@ -16,7 +16,7 @@ if __name__ == '__main__':
     batch_size = 1
     lr = 0.0001
     epochs = 2
-    n_news_features = 0
+    n_news_features = 16
     lstm_n_layers = 1
     lstm_hidden_size = n_news_features + 1
 
