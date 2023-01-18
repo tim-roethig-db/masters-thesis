@@ -66,7 +66,7 @@ if __name__ == '__main__':
     #)
     train_set = Dataset(
         df=df,
-        seq_len=30,
+        seq_len=5,
         test_len=5
     )
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
@@ -106,9 +106,6 @@ if __name__ == '__main__':
             epoch_loss += batch_loss
             monitor_loss = mae_loss(y_pred, y[:, 0, :])
             epoch_monitor_loss += monitor_loss
-
-            del y_pred
-            gc.collect()
 
             # perform gradient step
             model.zero_grad()
