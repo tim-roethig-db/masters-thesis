@@ -16,7 +16,7 @@ class StockPriceModel(nn.Module):
             nn.Tanh()
         )
 
-        self.lstm = nn.LSTM(
+        self.lstm = nn.GRU(
             input_size=n_news_features + 1,
             hidden_size=lstm_hidden_size,
             num_layers=lstm_n_layers,
