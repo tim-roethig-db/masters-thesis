@@ -46,7 +46,7 @@ class StockPriceModel(nn.Module):
         # run lstm
         y, state = self.lstm(x, state)
         y = self.linear(y[:, -1, :])
-        y = torch.zeros((1, 1)).to(torch.device('cuda'))
+        #y = torch.zeros((1, 1)).to(torch.device('cuda'))
 
         return y, state
 
