@@ -35,26 +35,26 @@
 #SBATCH --mail-type=ALL
 #write a mail if a job begins, ends, fails, gets requeued or stages out
 
-#SBATCH --mail-user=clemens.mollik@student.uni-tuebingen.de
+#SBATCH --mail-user=tim.roethig@student.uni-tuebingen.de
 # your mail address
 
 ####
 #b) copy all needed data in zip format to the jobs scratch folder and unzip it there
 ####
 echo Start copying...
-cp /home/mollik/Image-Inpainting/celeba.zip /scratch/$SLURM_JOB_ID/
+cp /home/mollik/masters_thesis/data.zip /scratch/$SLURM_JOB_ID/
 echo Change directory...
 cd /scratch/$SLURM_JOB_ID/
 echo Unzip data...
-unzip -qq celeba.zip
+unzip -qq data.zip
 echo Change directory back...
-cd /home/mollik/Image-Inpainting/
+cd /home/mollik/masters_thesis/
 echo Execute training...
 ####
 #c) Execute your file.
 ####
 
 # Uncomment to enable sbatch file
-singularity exec --nv /common/singularityImages/default.simg /home/mollik/miniconda3/envs/inpainting/bin/python train_PCNN.py
+singularity exec --nv /common/singularityImages/default.simg /home/mollik/miniconda3/envs/inpainting/bin/python train.py
 
 echo DONE!

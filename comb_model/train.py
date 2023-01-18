@@ -27,6 +27,7 @@ if __name__ == '__main__':
         lstm_n_layers=lstm_n_layers,
         lstm_hidden_size=lstm_hidden_size
     ).float()
+    model = torch.nn.DataParallel(model)
     model = model.to(device)
 
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
