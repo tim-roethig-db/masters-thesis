@@ -1,17 +1,22 @@
 import pandas as pd
 import torch
+import os
+import ctypes
+import gc
 
 from dataset import Dataset
 from model import StockPriceModel
 
 
 if __name__ == '__main__':
+    torch.set_num_threads(1)
+    print(torch.get_num_threads())
     batch_size = 1
     lr = 0.0001
-    epochs = 1
+    epochs = 2
     n_news_features = 16
-    lstm_n_layers = 2
-    lstm_hidden_size = n_news_features + 1
+    lstm_n_layers = 1
+    lstm_hidden_size = 9
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -49,7 +54,7 @@ if __name__ == '__main__':
     #print(f'Start training for {company}...')
 
     print('Reset LSTM parameters...')
-    model.reset_lstm()
+    #model.reset_lstm()
 
     print('Set up Data Loader...')
     #train_set = Dataset(
@@ -91,9 +96,8 @@ if __name__ == '__main__':
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
             #y_pred = torch.zeros(1)
-            #state = None
 
-            #state = [x.detach() for x in state]
+            state = [x.detach() for x in state]
 
             # compute loss
             batch_loss = loss(y_pred, y)
@@ -102,9 +106,9 @@ if __name__ == '__main__':
             epoch_monitor_loss += monitor_loss
 
             # perform gradient step
-            #model.zero_grad()
-            #batch_loss.backward()
-            #optimizer.step()
+            model.zero_grad()
+            batch_loss.backward()
+            optimizer.step()
 
             p = 100
             if (batch_idx+1) % p == 0:
@@ -114,8 +118,10 @@ if __name__ == '__main__':
 
                 batch_monitor_loss = 0
                 t_min = time_stamp.min() + 1
+                gc.collect()
             else:
                 batch_monitor_loss += monitor_loss
+
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 

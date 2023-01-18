@@ -6,7 +6,6 @@ from transformers import BertModel
 class StockPriceModel(nn.Module):
     def __init__(self, n_news_features: int, lstm_n_layers: int, lstm_hidden_size: int):
         super(StockPriceModel, self).__init__()
-        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
         self.n_news_features = n_news_features
 
@@ -24,12 +23,12 @@ class StockPriceModel(nn.Module):
             batch_first=True,
         )
 
-        self.linear = nn.Linear(n_news_features + 1, 1)
+        self.linear = nn.Linear(lstm_hidden_size, 1)
 
     def forward(self, news_input_ids, news_attention_mask, stock_price, news_feature_vect, state=None):
         # apply news processing for days with news
         # else fill with zeros
-        """
+
         for i in range(news_feature_vect.shape[1]):
             # if there is any input (>2 means more tokens than BOT and EOT)
             if news_input_ids[:, i, :].sum() > 0:
@@ -40,7 +39,7 @@ class StockPriceModel(nn.Module):
                 )
 
                 news_feature_vect[:, i, :] = self.text_feature_ext(pooler_output)
-        """
+
         # cat price with news features
         x = torch.cat((stock_price, news_feature_vect), dim=2)
 
