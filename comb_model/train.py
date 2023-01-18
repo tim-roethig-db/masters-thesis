@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
             # perform gradient step
             model.zero_grad()
-            #batch_loss.backward()
+            batch_loss.backward(retain_graph=False)
             optimizer.step()
             #torch.cuda.empty_cache()
 
