@@ -6,6 +6,7 @@ from transformers import BertModel
 class StockPriceModel(nn.Module):
     def __init__(self, n_news_features: int, lstm_n_layers: int, lstm_hidden_size: int):
         super(StockPriceModel, self).__init__()
+        self.n_news_features = n_news_features
 
         #self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
         self.bert = BertModel.from_pretrained('bert-base-uncased')
@@ -24,10 +25,10 @@ class StockPriceModel(nn.Module):
 
         self.linear = nn.Linear(lstm_hidden_size, 1)
 
-    def forward(self, news_input_ids, news_attention_mask, stock_price, news_feature_vect, state=None):
+    def forward(self, news_input_ids, news_attention_mask, stock_price, state=None):
         # apply news processing for days with news
         # else fill with zeros
-
+        """
         for i in range(news_feature_vect.shape[1]):
             # if there is any input (>2 means more tokens than BOT and EOT)
             if news_input_ids[:, i, :].sum() > 0:
@@ -37,10 +38,32 @@ class StockPriceModel(nn.Module):
                     return_dict=False
                 )
 
-                news_feature_vect[:, i, :] = self.text_feature_ext(pooler_output)
+                feature_vect = self.text_feature_ext(pooler_output)
+                print(news_feature_vect.shape)
+                #print(pooler_output)
+                print(feature_vect.shape)
+            else:
+                feature_vect = torch.zeros((1, self.n_news_features))
+                print(feature_vect.shape)
+        """
+        comp_feature_vect = None
+        for i in range(news_input_ids.shape[1]):
+            last_hidden_state, pooler_output = self.bert(
+                input_ids=news_input_ids[:, i, :],
+                attention_mask=news_attention_mask[:, i, :],
+                return_dict=False
+            )
+
+            feature_vect = self.text_feature_ext(pooler_output)[:, None, :]
+
+            if comp_feature_vect is None:
+                comp_feature_vect = feature_vect
+            else:
+                comp_feature_vect = torch.cat((comp_feature_vect, feature_vect), dim=1)
+
 
         # cat price with news features
-        x = torch.cat((stock_price, news_feature_vect), dim=2)
+        x = torch.cat((stock_price, comp_feature_vect), dim=2)
 
         # run lstm
         y, state = self.lstm(x, state)

@@ -43,7 +43,7 @@ if __name__ == '__main__':
     print('Start training...')
     #price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
     #news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
-    df = pd.read_csv('data/dataset.csv', sep=';', index_col='time_stamp')
+    df = pd.read_csv('../data/dataset.csv', sep=';', index_col='time_stamp')
 
     #companys = sorted(list(set(price_df.index.get_level_values(0))))
     #for company in companys:
@@ -86,11 +86,10 @@ if __name__ == '__main__':
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
             x_price = x_price.to(device)
-            news_feature_vect = torch.zeros(size=(x_price.shape[0], x_price.shape[1], n_news_features)).to(device)
             y = y.to(device)
 
             # get prediction
-            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
+            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, state)
             print(y_pred)
             #y_pred = torch.zeros((1, 1)).to(device)
             print(y_pred)
