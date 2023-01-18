@@ -99,6 +99,7 @@ if __name__ == '__main__':
             # compute loss
             batch_loss = loss(y_pred, y)
             epoch_loss += batch_loss
+            print(epoch_loss)
             monitor_loss = mae_loss(y_pred, y)
             epoch_monitor_loss += monitor_loss
 
