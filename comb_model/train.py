@@ -98,9 +98,9 @@ if __name__ == '__main__':
             print(y_pred)
             y_pred = torch.zeros(1).to(device)
             print(y_pred)
-            state = None
+            #state = None
 
-            #state = [x.detach() for x in state]
+            state = [x.detach() for x in state]
 
             # compute loss
             batch_loss = loss(y_pred, y[:, 0, :])
