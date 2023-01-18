@@ -109,7 +109,7 @@ if __name__ == '__main__':
             epoch_monitor_loss += monitor_loss
 
             # perform gradient step
-            #model.zero_grad()
+            model.zero_grad()
             #batch_loss.backward()
             #optimizer.step()
 
