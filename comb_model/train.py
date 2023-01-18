@@ -8,7 +8,12 @@ from model import StockPriceModel
 
 if __name__ == '__main__':
     torch.set_num_threads(1)
+
+    print(torch.get_num_threads())
     os.environ["OMP_NUM_THREADS"] = '1'
+    print(torch.get_num_threads())
+
+
     batch_size = 1
     lr = 0.0001
     epochs = 1
