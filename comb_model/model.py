@@ -16,7 +16,7 @@ class StockPriceModel(nn.Module):
             nn.Tanh()
         )
 
-        self.lstm = nn.GRU(
+        self.lstm = nn.LSTM(
             input_size=n_news_features + 1,
             hidden_size=lstm_hidden_size,
             num_layers=lstm_n_layers,
@@ -44,10 +44,10 @@ class StockPriceModel(nn.Module):
         x = torch.cat((stock_price, news_feature_vect), dim=2)
 
         # run lstm
-        y, _ = self.lstm(x, state)
+        y, state = self.lstm(x, state)
         y = self.linear(y[:, -1, :])
 
-        return y
+        return y, state
 
     def reset_lstm(self):
         self.lstm.reset_parameters()

@@ -15,8 +15,8 @@ if __name__ == '__main__':
     batch_size = 1
     lr = 0.0001
     epochs = 1
-    n_news_features = 16
-    lstm_n_layers = 2
+    n_news_features = 1
+    lstm_n_layers = 1
     lstm_hidden_size = n_news_features + 1
 
     # set device to cuda if available
@@ -82,7 +82,7 @@ if __name__ == '__main__':
         t_min = 0
 
         # reset state every epoch
-        #state = None
+        state = None
 
         # iter over batches
         for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
@@ -95,12 +95,11 @@ if __name__ == '__main__':
             y = y[:, 0, :].to(device)
 
             # get prediction
-            y_pred = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, None)
+            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, news_feature_vect, state)
             #y_pred = torch.zeros(1)
             libc.malloc_trim(ctypes.c_int(0))
 
-
-            #state = [x.detach() for x in state]
+            state = [x.detach() for x in state]
 
             # compute loss
             batch_loss = loss(y_pred, y)
