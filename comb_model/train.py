@@ -12,7 +12,7 @@ if __name__ == '__main__':
     lr = 0.0001
     epochs = 2
     n_news_features = 16
-    lstm_n_layers = 1
+    lstm_n_layers = 2
     lstm_hidden_size = 8
 
     # set device to cuda if available
@@ -113,10 +113,8 @@ if __name__ == '__main__':
 
             # perform gradient step
             model.zero_grad()
-            batch_loss.backward(retain_graph=False)
+            batch_loss.backward()
             optimizer.step()
-
-            #torch.cuda.empty_cache()
 
             p = 100
             if (batch_idx+1) % p == 0:
@@ -128,7 +126,6 @@ if __name__ == '__main__':
                 t_min = time_stamp.min() + 1
             else:
                 batch_monitor_loss += monitor_loss
-
 
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
