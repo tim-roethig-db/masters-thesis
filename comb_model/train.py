@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 import pandas as pd
 import torch
 #from pynvml import *
@@ -13,8 +14,8 @@ if __name__ == '__main__':
     lr = 0.0001
     epochs = 2
     n_news_features = 16
-    lstm_n_layers = 2
-    lstm_hidden_size = 32
+    rnn_n_layers = 2
+    rnn_hidden_size = 32
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -23,8 +24,8 @@ if __name__ == '__main__':
     print('Loaded model to device...')
     model = StockPriceModel(
         n_news_features=n_news_features,
-        lstm_n_layers=lstm_n_layers,
-        lstm_hidden_size=lstm_hidden_size
+        rnn_n_layers=rnn_n_layers,
+        rnn_hidden_size=rnn_hidden_size
     ).float()
     #model = torch.nn.DataParallel(model)
     model = model.to(device)
@@ -69,8 +70,9 @@ if __name__ == '__main__':
     """
     train_set = Dataset(
         df=df,
+        testing=False,
         seq_len=30,
-        test_len=5
+        test_len=1,
     )
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
     print(f'Series length: {len(train_set)}')
@@ -107,7 +109,8 @@ if __name__ == '__main__':
 
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, state)
-            state = [x.detach() for x in state]
+            state = state.detach()
+            #state = [x.detach() for x in state]
             #y_pred = torch.zeros(1)
             #state = None
 
@@ -122,7 +125,7 @@ if __name__ == '__main__':
             batch_loss.backward()
             optimizer.step()
 
-            p = 100
+            p = 10
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
                 print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/p:.5f}')
@@ -144,8 +147,16 @@ if __name__ == '__main__':
 
     print('Save model...')
     torch.save(model.state_dict(), 'model.t7')
+    pd.DataFrame({
+        'batch_size': [batch_size],
+        'lr': lr,
+        'epochs': epochs,
+        'n_news_features': n_news_features,
+        'rnn_n_layers': rnn_n_layers,
+        'rnn_hidden_size': rnn_hidden_size
+    }).to_json('conf.json')
 
     print('Zip files for download...')
-    os.system(f'zip ../model-lr_{lr}-e_{epochs}-nf_{n_news_features}_lstml_{lstm_n_layers}-lstmh_{lstm_hidden_size}.zip train_loss.csv model.t7')
+    os.system(f'zip ../model_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.zip train_loss.csv model.t7 conf.json')
 
 

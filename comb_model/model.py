@@ -4,7 +4,7 @@ from transformers import BertModel
 
 
 class StockPriceModel(nn.Module):
-    def __init__(self, n_news_features: int, lstm_n_layers: int, lstm_hidden_size: int):
+    def __init__(self, n_news_features: int, rnn_n_layers: int, rnn_hidden_size: int):
         super(StockPriceModel, self).__init__()
         self.n_news_features = n_news_features
 
@@ -16,14 +16,14 @@ class StockPriceModel(nn.Module):
             nn.Tanh()
         )
 
-        self.lstm = nn.LSTM(
+        self.rnn = nn.GRU(
             input_size=n_news_features + 1,
-            hidden_size=lstm_hidden_size,
-            num_layers=lstm_n_layers,
+            hidden_size=rnn_hidden_size,
+            num_layers=rnn_n_layers,
             batch_first=True,
         )
 
-        self.linear = nn.Linear(lstm_hidden_size, 1)
+        self.linear = nn.Linear(rnn_hidden_size, 1)
 
     def forward(self, news_input_ids, news_attention_mask, stock_price, state=None):
         # apply news processing
@@ -38,15 +38,11 @@ class StockPriceModel(nn.Module):
         # cat price with news features
         x = torch.cat((stock_price, comp_feature_vect), dim=2)
 
-        # run lstm
-        y, state = self.lstm(x, state)
+        # run rnn
+        y, state = self.rnn(x, state)
         y = self.linear(y[:, -1, :])
 
         return y, state
-
-    def reset_lstm(self):
-        self.lstm.reset_parameters()
-        self.linear.reset_parameters()
 
 
 if __name__ == '__main__':

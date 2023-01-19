@@ -5,7 +5,6 @@ from transformers import BertTokenizer
 
 pd.options.display.max_columns = 10
 pd.options.display.max_rows = None
-#pd.options.expand_frame_repr = False
 pd.set_option('expand_frame_repr', False)
 
 
@@ -72,7 +71,7 @@ class Dataset_old(torch.utils.data.Dataset):
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, df: pd.DataFrame, seq_len: int = 30, test_len: int = 5):
+    def __init__(self, df: pd.DataFrame, testing: bool, seq_len: int = 30, test_len: int = 1):
         self.dtype = 'float32'
         self.seq_len = seq_len
         self.test_len = test_len
@@ -84,6 +83,11 @@ class Dataset(torch.utils.data.Dataset):
         df = df.reset_index().reset_index()
 
         self.x = df[['alpha', 'title', 'index']].values
+
+        if not testing:
+            self.x = self.x[:3000, :]
+        elif testing:
+            self.x = self.x[3000-seq_len:, :]
 
     def __getitem__(self, idx: int):
         x_price = torch.from_numpy(self.x[idx:(idx+self.seq_len), 0].astype(self.dtype))
@@ -128,6 +132,6 @@ if __name__ == '__main__':
 
     df = pd.read_csv('../data/dataset.csv', sep=';', index_col='time_stamp')
 
-    ds = Dataset(df)
+    ds = Dataset(df, testing=True)
 
     print(ds[0])
