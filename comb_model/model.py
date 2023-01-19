@@ -32,8 +32,6 @@ class StockPriceModel(nn.Module):
             attention_mask=news_attention_mask[0, :, :],
             return_dict=False
         )
-        print(last_hidden_state.shape)
-        print(pooler_output.shape)
         #comp_feature_vect = self.text_feature_ext(pooler_output)[None, :, :]
         comp_feature_vect = self.text_feature_ext(last_hidden_state[:, 0, :])[None, :, :]
 

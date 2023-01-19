@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import torch
 #from pynvml import *
@@ -10,10 +11,10 @@ if __name__ == '__main__':
     print(torch.get_num_threads())
     batch_size = 1
     lr = 0.0001
-    epochs = 10
+    epochs = 2
     n_news_features = 16
     lstm_n_layers = 2
-    lstm_hidden_size = 8
+    lstm_hidden_size = 32
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -42,26 +43,30 @@ if __name__ == '__main__':
     mae_loss = torch.nn.L1Loss().to(device)
 
     print('Start training...')
-    #price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
-    #news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
+    """
+    price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
+    news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
+    """
     df = pd.read_csv('../data/dataset.csv', sep=';', index_col='time_stamp')
+    """
+    companys = sorted(list(set(price_df.index.get_level_values(0))))
+    for company in companys:
+        if not price_df.loc[company].isnull().values.any():
+    print(f'Start training for {company}...')
 
-    #companys = sorted(list(set(price_df.index.get_level_values(0))))
-    #for company in companys:
-    #    if not price_df.loc[company].isnull().values.any():
-    #print(f'Start training for {company}...')
-
-    #print('Reset LSTM parameters...')
-    #model.reset_lstm()
-
+    print('Reset LSTM parameters...')
+    model.reset_lstm()
+    """
     print('Set up Data Loader...')
-    #train_set = Dataset(
-    #    company=company,
-    #    news_df=news_df,
-    #    price_df=price_df,
-    #    seq_len=30,
-    #    test_len=5
-    #)
+    """
+    train_set = Dataset(
+        company=company,
+        news_df=news_df,
+        price_df=price_df,
+        seq_len=30,
+        test_len=5
+    )
+    """
     train_set = Dataset(
         df=df,
         seq_len=30,
@@ -101,9 +106,10 @@ if __name__ == '__main__':
             y = y.to(device)
 
             # get prediction
-            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, state)
-
-            state = [x.detach() for x in state]
+            #y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, state)
+            #state = [x.detach() for x in state]
+            y_pred = torch.zeros(1)
+            state = None
 
             # compute loss
             batch_loss = loss(y_pred, y[:, 0, :])
@@ -112,9 +118,9 @@ if __name__ == '__main__':
             epoch_monitor_loss += monitor_loss
 
             # perform gradient step
-            model.zero_grad()
-            batch_loss.backward()
-            optimizer.step()
+            #model.zero_grad()
+            #batch_loss.backward()
+            #optimizer.step()
 
             p = 100
             if (batch_idx+1) % p == 0:
@@ -134,7 +140,12 @@ if __name__ == '__main__':
         columns=['epoch', 'iteration', 'MAE'],
         data=loss_df
     )
-    loss_df.to_csv(f"loss_lr_{lr}_epoch_{epochs}.csv", index=False, sep=';')
+    loss_df.to_csv('train_loss.csv', index=False, sep=';')
 
     print('Save model...')
-    torch.save(model.state_dict(), 'lstm.t7')
+    torch.save(model.state_dict(), 'model.t7')
+
+    print('Zip files for download...')
+    os.system(f'zip ../model_lr_{lr}_epoch_{epochs}.zip train_loss.csv model.t7')
+
+
