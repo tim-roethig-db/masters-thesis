@@ -9,7 +9,7 @@ class StockPriceModel(nn.Module):
         self.n_news_features = n_news_features
 
         self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
-        #self.bert = BertModel.from_pretrained('bert-base-uncased')
+        #self.bert = BertModel.from_pretrained('bert-small')
 
         self.text_feature_ext = nn.Sequential(
             nn.Linear(768, n_news_features),
@@ -26,52 +26,16 @@ class StockPriceModel(nn.Module):
         self.linear = nn.Linear(lstm_hidden_size, 1)
 
     def forward(self, news_input_ids, news_attention_mask, stock_price, state=None):
-        # apply news processing for days with news
-        # else fill with zeros
-        """
-        for i in range(news_feature_vect.shape[1]):
-            # if there is any input (>2 means more tokens than BOT and EOT)
-            if news_input_ids[:, i, :].sum() > 0:
-                last_hidden_state, pooler_output = self.bert(
-                    input_ids=news_input_ids[:, i, :],
-                    attention_mask=news_attention_mask[:, i, :],
-                    return_dict=False
-                )
-
-                feature_vect = self.text_feature_ext(pooler_output)
-                print(news_feature_vect.shape)
-                #print(pooler_output)
-                print(feature_vect.shape)
-            else:
-                feature_vect = torch.zeros((1, self.n_news_features))
-                print(feature_vect.shape)
-        """
-        """
-        comp_feature_vect = None
-        print(news_input_ids.shape)
-        print(news_input_ids[:, 3, :].shape)
-        for i in range(news_input_ids.shape[1]):
-            last_hidden_state, pooler_output = self.bert(
-                input_ids=news_input_ids[:, i, :],
-                attention_mask=news_attention_mask[:, i, :],
-                return_dict=False
-            )
-            print(pooler_output.shape)
-
-            feature_vect = self.text_feature_ext(pooler_output)[:, None, :]
-
-            if comp_feature_vect is None:
-                comp_feature_vect = feature_vect
-            else:
-                comp_feature_vect = torch.cat((comp_feature_vect, feature_vect), dim=1)
-        print(comp_feature_vect.shape)
-        """
+        # apply news processing
         last_hidden_state, pooler_output = self.bert(
             input_ids=news_input_ids[0, :, :],
             attention_mask=news_attention_mask[0, :, :],
             return_dict=False
         )
-        comp_feature_vect = self.text_feature_ext(pooler_output)[None, :, :]
+        print(last_hidden_state.shape)
+        print(pooler_output.shape)
+        #comp_feature_vect = self.text_feature_ext(pooler_output)[None, :, :]
+        comp_feature_vect = self.text_feature_ext(last_hidden_state[:, 0, :])[None, :, :]
 
         # cat price with news features
         x = torch.cat((stock_price, comp_feature_vect), dim=2)

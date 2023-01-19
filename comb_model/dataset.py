@@ -77,7 +77,7 @@ class Dataset(torch.utils.data.Dataset):
         self.seq_len = seq_len
         self.test_len = test_len
         self.tokenizer = BertTokenizer.from_pretrained('../models/bert-base-uncased')
-        #self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        #self.tokenizer = BertTokenizer.from_pretrained('bert-small')
 
         df['title'] = df['title'].apply(lambda x: self.pd_tokenizer(x))
 
@@ -113,7 +113,6 @@ class Dataset(torch.utils.data.Dataset):
                 return_tensors='pt',
                 return_token_type_ids=False
             )
-
         else:
             x = {
                 'input_ids': torch.zeros(1, 512, dtype=int),
