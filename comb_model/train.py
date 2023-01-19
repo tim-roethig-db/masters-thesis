@@ -146,6 +146,6 @@ if __name__ == '__main__':
     torch.save(model.state_dict(), 'model.t7')
 
     print('Zip files for download...')
-    os.system(f'zip ../model_lr_{lr}_epoch_{epochs}.zip train_loss.csv model.t7')
+    os.system(f'zip ../model-lr_{lr}-e_{epochs}-nf_{n_news_features}_lstml_{lstm_n_layers}-lstmh_{lstm_hidden_size}.zip train_loss.csv model.t7')
 
 
