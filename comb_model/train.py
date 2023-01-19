@@ -71,7 +71,7 @@ if __name__ == '__main__':
     train_set = Dataset(
         df=df,
         testing=False,
-        seq_len=40,
+        seq_len=30,
         test_len=1,
     )
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
