@@ -11,11 +11,12 @@ from model import StockPriceModel
 if __name__ == '__main__':
     print(torch.get_num_threads())
     batch_size = 1
-    lr = 0.0001
-    epochs = 1
-    n_news_features = 16
-    rnn_n_layers = 2
-    rnn_hidden_size = 32
+    lr = 0.001
+    epochs = 30
+    n_news_features = 8
+    rnn_n_layers = 1
+    rnn_hidden_size = 8
+    seq_len = 40
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -71,7 +72,7 @@ if __name__ == '__main__':
     train_set = Dataset(
         df=df,
         testing=False,
-        seq_len=30,
+        seq_len=seq_len,
         test_len=1,
     )
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
@@ -109,8 +110,8 @@ if __name__ == '__main__':
 
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, state)
-            state = state.detach()
-            #state = [x.detach() for x in state]
+            #state = state.detach()
+            state = [x.detach() for x in state]
             #y_pred = torch.zeros(1)
             #state = None
 
@@ -153,10 +154,11 @@ if __name__ == '__main__':
         'epochs': epochs,
         'n_news_features': n_news_features,
         'rnn_n_layers': rnn_n_layers,
-        'rnn_hidden_size': rnn_hidden_size
+        'rnn_hidden_size': rnn_hidden_size,
+        'seq_len': seq_len
     }).to_json('conf.json')
 
     print('Zip files for download...')
-    os.system(f'zip ../model_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.zip train_loss.csv model.t7 conf.json')
+    os.system(f'zip ./model_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.zip train_loss.csv model.t7 conf.json')
 
 

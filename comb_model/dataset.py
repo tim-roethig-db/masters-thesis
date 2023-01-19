@@ -82,6 +82,8 @@ class Dataset(torch.utils.data.Dataset):
 
         df = df.reset_index().reset_index()
 
+        #df['alpha'] = abs(df['alpha'])
+
         self.x = df[['alpha', 'title', 'index']].values
 
         if not testing:

@@ -7,39 +7,46 @@ class StockPriceModel(nn.Module):
     def __init__(self, n_news_features: int, rnn_n_layers: int, rnn_hidden_size: int):
         super(StockPriceModel, self).__init__()
         self.n_news_features = n_news_features
+        if self.n_news_features > 0:
+            self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
+            #self.bert = BertModel.from_pretrained('bert-small')
 
-        self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
-        #self.bert = BertModel.from_pretrained('bert-small')
+            self.text_feature_ext = nn.Sequential(
+                nn.Linear(768, n_news_features),
+                nn.Tanh()
+            )
 
-        self.text_feature_ext = nn.Sequential(
-            nn.Linear(768, n_news_features),
-            nn.Tanh()
-        )
-
-        self.rnn = nn.GRU(
+        self.rnn = nn.LSTM(
             input_size=n_news_features + 1,
             hidden_size=rnn_hidden_size,
             num_layers=rnn_n_layers,
             batch_first=True,
         )
 
+        self.tanh = nn.Tanh()
+
         self.linear = nn.Linear(rnn_hidden_size, 1)
 
     def forward(self, news_input_ids, news_attention_mask, stock_price, state=None):
-        # apply news processing
-        last_hidden_state, pooler_output = self.bert(
-            input_ids=news_input_ids[0, :, :],
-            attention_mask=news_attention_mask[0, :, :],
-            return_dict=False
-        )
-        #comp_feature_vect = self.text_feature_ext(pooler_output)[None, :, :]
-        comp_feature_vect = self.text_feature_ext(last_hidden_state[:, 0, :])[None, :, :]
+        if self.n_news_features > 0:
+            # apply news processing
+            with torch.no_grad():
+                last_hidden_state, pooler_output = self.bert(
+                    input_ids=news_input_ids[0, :, :],
+                    attention_mask=news_attention_mask[0, :, :],
+                    return_dict=False
+                )
+            #comp_feature_vect = self.text_feature_ext(pooler_output)[None, :, :]
+            comp_feature_vect = self.text_feature_ext(last_hidden_state[:, 0, :])[None, :, :]
 
-        # cat price with news features
-        x = torch.cat((stock_price, comp_feature_vect), dim=2)
+            # cat price with news features
+            x = torch.cat((stock_price, comp_feature_vect), dim=2)
+        else:
+            x = stock_price
 
         # run rnn
         y, state = self.rnn(x, state)
+        #y = self.tanh(y)
         y = self.linear(y[:, -1, :])
 
         return y, state
