@@ -4,7 +4,7 @@ import torch
 from transformers import BertTokenizer
 
 pd.options.display.max_columns = 10
-pd.options.display.max_rows = None
+pd.options.display.max_rows = 10
 pd.set_option('expand_frame_repr', False)
 
 
@@ -71,12 +71,15 @@ class Dataset_old(torch.utils.data.Dataset):
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, df: pd.DataFrame, testing: bool, seq_len: int = 30, test_len: int = 1):
+    def __init__(self, df: pd.DataFrame, testing: bool, lag: int, seq_len: int, test_len: int):
         self.dtype = 'float32'
         self.seq_len = seq_len
         self.test_len = test_len
         self.tokenizer = BertTokenizer.from_pretrained('../models/bert-base-uncased')
         #self.tokenizer = BertTokenizer.from_pretrained('bert-small')
+
+        df['title'] = df['title'].shift(-lag)
+        df = df.drop(df.tail(lag).index)
 
         df['title'] = df['title'].apply(lambda x: self.pd_tokenizer(x))
 
@@ -134,6 +137,6 @@ if __name__ == '__main__':
 
     df = pd.read_csv('../data/dataset.csv', sep=';', index_col='time_stamp')
 
-    ds = Dataset(df, testing=True)
+    ds = Dataset(df, testing=True, lag=0, seq_len=30, test_len=5)
 
-    print(ds[0])
+    #print(ds[0])

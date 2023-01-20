@@ -13,10 +13,11 @@ if __name__ == '__main__':
     batch_size = 1
     lr = 0.001
     epochs = 20
-    n_news_features = 0
+    n_news_features = 8
     rnn_n_layers = 1
-    rnn_hidden_size = 8
+    rnn_hidden_size = 16
     seq_len = 40
+    lag = 1
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -72,6 +73,7 @@ if __name__ == '__main__':
     train_set = Dataset(
         df=df,
         testing=False,
+        lag=lag,
         seq_len=seq_len,
         test_len=1,
     )
@@ -91,6 +93,7 @@ if __name__ == '__main__':
 
         # iter over batches
         for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
+            #print(batch_idx)
             """
             if torch.cuda.is_available():
                 for i in range(4):
@@ -155,7 +158,8 @@ if __name__ == '__main__':
         'n_news_features': n_news_features,
         'rnn_n_layers': rnn_n_layers,
         'rnn_hidden_size': rnn_hidden_size,
-        'seq_len': seq_len
+        'seq_len': seq_len,
+        'lag': lag
     }).to_json('conf.json')
 
     print('Zip files for download...')
