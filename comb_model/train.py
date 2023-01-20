@@ -12,10 +12,10 @@ if __name__ == '__main__':
     print(torch.get_num_threads())
     batch_size = 1
     lr = 0.001
-    epochs = 20
-    n_news_features = 0
+    epochs = 10
+    n_news_features = 8
     rnn_n_layers = 1
-    rnn_hidden_size = 8
+    rnn_hidden_size = 16
     seq_len = 40
 
     # set device to cuda if available
