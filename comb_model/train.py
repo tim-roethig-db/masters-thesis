@@ -12,7 +12,7 @@ if __name__ == '__main__':
     print(torch.get_num_threads())
     batch_size = 1
     lr = 0.001
-    epochs = 20
+    epochs = 10
     n_news_features = 8
     rnn_n_layers = 1
     rnn_hidden_size = 16
