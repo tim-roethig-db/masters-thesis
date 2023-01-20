@@ -31,14 +31,18 @@ class StockPriceModel(nn.Module):
     def forward(self, news_input_ids, news_attention_mask, stock_price, state=None):
         if self.n_news_features > 0:
             # apply news processing
+            batch_size = news_input_ids.shape[0]
             with torch.no_grad():
+                news_input_ids = news_input_ids.flatten(start_dim=0, end_dim=1)
+                news_attention_mask = news_attention_mask.flatten(start_dim=0, end_dim=1)
                 last_hidden_state, pooler_output = self.bert(
-                    input_ids=news_input_ids[0, :, :],
-                    attention_mask=news_attention_mask[0, :, :],
+                    input_ids=news_input_ids,
+                    attention_mask=news_attention_mask,
                     return_dict=False
                 )
+                last_hidden_state = last_hidden_state.unflatten(0, (batch_size, int(last_hidden_state.shape[0] / batch_size)))
             #comp_feature_vect = self.text_feature_ext(pooler_output)[None, :, :]
-            comp_feature_vect = self.text_feature_ext(last_hidden_state[:, 0, :])[None, :, :]
+            comp_feature_vect = self.text_feature_ext(last_hidden_state[:, :, 0, :])#[None, :, :]
 
             # cat price with news features
             x = torch.cat((stock_price, comp_feature_vect), dim=2)
