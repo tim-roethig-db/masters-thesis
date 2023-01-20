@@ -10,7 +10,7 @@ from model import StockPriceModel
 
 if __name__ == '__main__':
     print(torch.get_num_threads())
-    batch_size = 4
+    batch_size = 16
     lr = 0.001
     epochs = 10
     n_news_features = 8
