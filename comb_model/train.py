@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
         # iter over batches
         for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
-            print(batch_idx)
+            #print(batch_idx)
             """
             if torch.cuda.is_available():
                 for i in range(4):
@@ -130,14 +130,13 @@ if __name__ == '__main__':
             optimizer.step()
 
             p = 112 // batch_size
-            print(p)
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
                 print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/(p*batch_size):.5f}')
                 loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/(p*batch_size)).item()])
 
                 batch_monitor_loss = 0
-                t_min = time_stamp.min() + 1
+                t_min = time_stamp.min() + batch_size
             else:
                 batch_monitor_loss += monitor_loss
 
