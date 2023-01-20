@@ -12,8 +12,8 @@ if __name__ == '__main__':
     print(torch.get_num_threads())
     batch_size = 1
     lr = 0.001
-    epochs = 30
-    n_news_features = 8
+    epochs = 20
+    n_news_features = 0
     rnn_n_layers = 1
     rnn_hidden_size = 8
     seq_len = 40
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     )
 
     print('Setup loss function...')
-    loss = torch.nn.MSELoss(reduction='sum').to(device)
+    loss = torch.nn.MSELoss().to(device)
     mae_loss = torch.nn.L1Loss().to(device)
 
     print('Start training...')
@@ -110,8 +110,8 @@ if __name__ == '__main__':
 
             # get prediction
             y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, state)
-            #state = state.detach()
-            state = [x.detach() for x in state]
+            state = state.detach()
+            #state = [x.detach() for x in state]
             #y_pred = torch.zeros(1)
             #state = None
 
