@@ -130,6 +130,7 @@ if __name__ == '__main__':
             optimizer.step()
 
             p = 112 // batch_size
+            print(p)
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
                 print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/(p*batch_size):.5f}')
