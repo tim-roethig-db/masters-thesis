@@ -9,6 +9,8 @@ class StockPriceModel(nn.Module):
         self.n_news_features = n_news_features
         if self.n_news_features > 0:
             self.bert = BertModel.from_pretrained('../models/bert-base-uncased')
+            for param in self.bert.parameters():
+                param.requires_grad = False
             #self.bert = BertModel.from_pretrained('bert-small')
 
             self.text_feature_ext = nn.Sequential(
