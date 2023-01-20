@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     print('Setup loss function...')
     loss = torch.nn.MSELoss().to(device)
-    mae_loss = torch.nn.L1Loss().to(device)
+    mae_loss = torch.nn.L1Loss(reduction='sum').to(device)
 
     print('Start training...')
     """
