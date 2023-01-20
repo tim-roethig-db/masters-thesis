@@ -76,7 +76,6 @@ class Dataset(torch.utils.data.Dataset):
         self.seq_len = seq_len
         self.test_len = test_len
         self.tokenizer = BertTokenizer.from_pretrained('../models/finbert')
-        #self.tokenizer = BertTokenizer.from_pretrained('bert-small')
 
         df['title'] = df['title'].shift(-lag)
         df = df.drop(df.tail(lag).index)
@@ -139,4 +138,4 @@ if __name__ == '__main__':
 
     ds = Dataset(df, testing=True, lag=0, seq_len=30, test_len=5)
 
-    #print(ds[0])
+    print(ds[0])

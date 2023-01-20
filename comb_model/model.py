@@ -11,7 +11,6 @@ class StockPriceModel(nn.Module):
             self.bert = BertModel.from_pretrained('../models/finbert')
             for param in self.bert.parameters():
                 param.requires_grad = False
-            #self.bert = BertModel.from_pretrained('bert-small')
 
             self.text_feature_ext = nn.Sequential(
                 nn.Linear(768, n_news_features),
