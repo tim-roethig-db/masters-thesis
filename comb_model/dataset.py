@@ -251,7 +251,7 @@ class Dataset(torch.utils.data.Dataset):
             dim=0
         )
 
-        y = torch.from_numpy(self.x[(idx+self.seq_len):(idx+self.seq_len+self.test_len), 0].astype(self.dtype))
+        y = torch.from_numpy(self.x[(idx+self.seq_len):(idx+self.seq_len+self.test_len), 2].astype(self.dtype))
         y = y[:, None]
 
         return time_stamp, x_price, x_news_input_ids, x_news_attention_mask, y
