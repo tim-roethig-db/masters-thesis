@@ -12,8 +12,8 @@ if __name__ == '__main__':
     print(torch.get_num_threads())
     batch_size = 16
     lr = 0.001
-    epochs = 10
-    n_news_features = 8
+    epochs = 5
+    n_news_features = 15
     rnn_n_layers = 1
     rnn_hidden_size = 16
     seq_len = 40
@@ -46,30 +46,8 @@ if __name__ == '__main__':
     mae_loss = torch.nn.L1Loss(reduction='sum').to(device)
 
     print('Start training...')
-    """
-    price_df = pd.read_csv('../data/stocks_prices_prep.csv', sep=';', index_col=['company', 'time_stamp'])
-    news_df = pd.read_csv('../data/articles_prep.csv', sep=';', index_col=['company', 'time_stamp'])
-    """
     df = pd.read_csv('../data/dataset.csv', sep=';', index_col='time_stamp')
-    """
-    companys = sorted(list(set(price_df.index.get_level_values(0))))
-    for company in companys:
-        if not price_df.loc[company].isnull().values.any():
-    print(f'Start training for {company}...')
-
-    print('Reset LSTM parameters...')
-    model.reset_lstm()
-    """
     print('Set up Data Loader...')
-    """
-    train_set = Dataset(
-        company=company,
-        news_df=news_df,
-        price_df=price_df,
-        seq_len=30,
-        test_len=5
-    )
-    """
     train_set = Dataset(
         df=df,
         testing=False,
@@ -92,8 +70,8 @@ if __name__ == '__main__':
         state = None
 
         # iter over batches
-        for batch_idx, (x_news_input_ids, x_news_attention_mask, x_price, y, time_stamp) in enumerate(train_loader):
-            #print(batch_idx)
+        for batch_idx, (time_stamp, x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
+            print(batch_idx)
             """
             if torch.cuda.is_available():
                 for i in range(4):
@@ -106,13 +84,13 @@ if __name__ == '__main__':
                 print('------------------------------------------------')
             """
             # move data to device
+            x_price = x_price.to(device)
             x_news_input_ids = x_news_input_ids.to(device)
             x_news_attention_mask = x_news_attention_mask.to(device)
-            x_price = x_price.to(device)
             y = y.to(device)
 
             # get prediction
-            y_pred, state = model(x_news_input_ids, x_news_attention_mask, x_price, state)
+            y_pred, state = model(x_price, x_news_input_ids, x_news_attention_mask, state)
             state = state.detach()
             #state = [x.detach() for x in state]
             #y_pred = torch.zeros(1)

@@ -28,30 +28,34 @@ class StockPriceModel(nn.Module):
 
         self.linear = nn.Linear(rnn_hidden_size, 1)
 
-    def forward(self, news_input_ids, news_attention_mask, stock_price, state=None):
+    def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
         if self.n_news_features > 0:
             # apply news processing
-            batch_size = news_input_ids.shape[0]
+            batch_size = x_news_input_ids.shape[0]
+            # TODO find out whether to compute gradients for bert
+
             with torch.no_grad():
-                news_input_ids = news_input_ids.flatten(start_dim=0, end_dim=1)
-                news_attention_mask = news_attention_mask.flatten(start_dim=0, end_dim=1)
+                x_news_input_ids = x_news_input_ids.flatten(start_dim=0, end_dim=1)
+                x_news_attention_mask = x_news_attention_mask.flatten(start_dim=0, end_dim=1)
                 last_hidden_state, pooler_output = self.bert(
-                    input_ids=news_input_ids,
-                    attention_mask=news_attention_mask,
+                    input_ids=x_news_input_ids,
+                    attention_mask=x_news_attention_mask,
                     return_dict=False
                 )
                 last_hidden_state = last_hidden_state.unflatten(0, (batch_size, int(last_hidden_state.shape[0] / batch_size)))
-            #comp_feature_vect = self.text_feature_ext(pooler_output)[None, :, :]
-            comp_feature_vect = self.text_feature_ext(last_hidden_state[:, :, 0, :])#[None, :, :]
+
+            # TODO use attention layer as feature extractor
+            # TODO find out which part of last_hidden_state to use for output
+            comp_feature_vect = self.text_feature_ext(last_hidden_state[:, :, 0, :])
 
             # cat price with news features
-            x = torch.cat((stock_price, comp_feature_vect), dim=2)
+            x = torch.cat((x_price, comp_feature_vect), dim=2)
         else:
-            x = stock_price
+            x = x_price
 
         # run rnn
         y, state = self.rnn(x, state)
-        #y = self.tanh(y)
+
         y = self.linear(y[:, -1, :])
 
         return y, state
