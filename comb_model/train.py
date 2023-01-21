@@ -10,7 +10,7 @@ from model import StockPriceModel
 
 if __name__ == '__main__':
     print(torch.get_num_threads())
-    batch_size = 16
+    batch_size = 32
     lr = 0.001
     epochs = 5
     n_news_features = 15
@@ -107,7 +107,7 @@ if __name__ == '__main__':
             batch_loss.backward()
             optimizer.step()
 
-            p = 112 // batch_size
+            p = 100 // batch_size
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
                 print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/(p*batch_size):.5f}')
