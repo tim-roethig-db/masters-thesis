@@ -13,7 +13,7 @@ class StockPriceModel(nn.Module):
                 param.requires_grad = False
 
             self.text_feature_ext = nn.Sequential(
-                nn.Linear(768, 70800),
+                nn.Linear(768, 76800),
                 nn.ReLU(),
                 nn.Linear(76800, 768),
                 nn.ReLU(),
