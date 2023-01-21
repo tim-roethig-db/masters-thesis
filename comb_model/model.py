@@ -47,6 +47,7 @@ class StockPriceModel(nn.Module):
             # TODO use attention layer as feature extractor
             # TODO find out which part of last_hidden_state to use for output
             comp_feature_vect = self.text_feature_ext(last_hidden_state[:, :, 0, :])
+            print(comp_feature_vect)
 
             # cat price with news features
             x = torch.cat((x_price, comp_feature_vect), dim=2)
