@@ -12,7 +12,7 @@ if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
     epochs = 10
-    news_features = False
+    news_features = True
     rnn_n_layers = 1
     rnn_hidden_size = 16
     seq_len = 32
