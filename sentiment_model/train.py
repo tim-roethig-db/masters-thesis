@@ -9,8 +9,8 @@ from model import StockPriceModel
 
 
 if __name__ == '__main__':
-    batch_size = 16
-    lr = 0.01
+    batch_size = 1
+    lr = 0.001
     epochs = 10
     news_features = True
     rnn_n_layers = 1

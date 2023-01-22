@@ -9,8 +9,8 @@ class StockPriceModel(nn.Module):
         self.news_features = news_features
         if self.news_features:
             self.sentiment_bert = AutoModelForSequenceClassification.from_pretrained('../models/finbert')
-            for param in self.sentiment_bert.parameters():
-                param.requires_grad = False
+            #for param in self.sentiment_bert.parameters():
+            #    param.requires_grad = False
         """
         self.sequence_model = nn.GRU(
             input_size=1 + 3*news_features,
@@ -47,15 +47,15 @@ class StockPriceModel(nn.Module):
             # apply news processing
             batch_size = x_news_input_ids.shape[0]
 
-            with torch.no_grad():
-                x_news_input_ids = x_news_input_ids.flatten(start_dim=0, end_dim=1)
-                x_news_attention_mask = x_news_attention_mask.flatten(start_dim=0, end_dim=1)
-                bert_out = self.sentiment_bert(
-                    input_ids=x_news_input_ids,
-                    attention_mask=x_news_attention_mask,
-                    return_dict=True
-                )
-                sentiment = bert_out['logits'].unflatten(0, (batch_size, int(bert_out['logits'].shape[0] / batch_size)))
+            #with torch.no_grad():
+            x_news_input_ids = x_news_input_ids.flatten(start_dim=0, end_dim=1)
+            x_news_attention_mask = x_news_attention_mask.flatten(start_dim=0, end_dim=1)
+            bert_out = self.sentiment_bert(
+                input_ids=x_news_input_ids,
+                attention_mask=x_news_attention_mask,
+                return_dict=True
+            )
+            sentiment = bert_out['logits'].unflatten(0, (batch_size, int(bert_out['logits'].shape[0] / batch_size)))
             # cat price with news features
             x = torch.cat((x_price, sentiment), dim=2)
         else:
@@ -73,5 +73,4 @@ class StockPriceModel(nn.Module):
         x = x.flatten(start_dim=1, end_dim=2)
         y = self.conv_arn_head(x)
         """
-
         return y, state
