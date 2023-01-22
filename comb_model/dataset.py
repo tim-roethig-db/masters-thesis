@@ -206,14 +206,6 @@ class Dataset(torch.utils.data.Dataset):
         self.test_len = test_len
         self.tokenizer = BertTokenizer.from_pretrained('../models/finbert')
 
-        if not testing:
-            df = df.drop(df.tail(len(df)-3000).index)
-        elif testing:
-            df = df.drop(df.head(3000).index)
-
-        df['title'] = df['title'].shift(-lag)
-        df = df.drop(df.tail(lag).index)
-
         df['title'] = df['title'].fillna('')
 
         encoding = self.tokenizer(
@@ -233,6 +225,15 @@ class Dataset(torch.utils.data.Dataset):
 
         df = df.reset_index().reset_index()
         df = df[['index', 'title', 'alpha', 'input_ids', 'attention_mask', 'length']]
+
+        if not testing:
+            df = df.drop(df.tail(len(df)-3000).index)
+        elif testing:
+            df = df.drop(df.head(3000).index)
+
+        df['title'] = df['title'].shift(-lag)
+        df = df.drop(df.tail(lag).index)
+        print(df.loc[676, 'title'])
 
         self.x = df.values
 

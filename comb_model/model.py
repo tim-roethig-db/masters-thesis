@@ -13,9 +13,7 @@ class StockPriceModel(nn.Module):
                 param.requires_grad = False
 
             self.text_feature_ext = nn.Sequential(
-                nn.Linear(768, 128),
-                nn.ReLU(),
-                nn.Linear(128, n_news_features),
+                nn.Linear(768, n_news_features),
                 nn.ReLU()
             )
 
@@ -57,6 +55,113 @@ class StockPriceModel(nn.Module):
         y, state = self.rnn(x, state)
 
         y = self.linear(y[:, -1, :])
+
+        return y, state
+
+
+class StockPriceModelARN(nn.Module):
+    def __init__(self, n_news_features: int, seq_len: int):
+        super(StockPriceModelARN, self).__init__()
+        self.n_news_features = n_news_features
+
+        self.activation = torch.nn.LeakyReLU()
+
+        if self.n_news_features > 0:
+            self.bert = BertModel.from_pretrained('../models/finbert')
+            for param in self.bert.parameters():
+                param.requires_grad = False
+            """
+            self.text_feature_ext = nn.Sequential(
+                nn.Linear(768, 128),
+                nn.Tanh(),
+                nn.Linear(128, n_news_features),
+                nn.Tanh()
+            )
+            """
+            self.text_feature_ext = nn.Sequential(
+                nn.Conv1d(768, 512, 4, padding=1),
+                nn.Tanh(),
+                nn.Conv1d(512, 256, 4, padding=1),
+                nn.Tanh(),
+            )
+        """
+        self.arn = nn.Sequential(
+            nn.Linear(seq_len, 20),
+            nn.Tanh(),
+            nn.Linear(20, 1),
+        )
+        
+        self.arcn = nn.Sequential(
+            nn.Conv1d(n_news_features+1, 32, 3, dilation=1),
+            nn.Tanh(),
+            nn.Conv1d(32, 64, 3, dilation=2),
+            nn.Tanh(),
+            nn.Conv1d(1, 1, 3, dilation=4),
+            nn.Tanh(),
+            nn.Conv1d(1, 1, 3, dilation=8),
+            nn.Tanh(),
+            nn.Linear(10, 1),
+        )
+        """
+        self.price_feature_ext = nn.Sequential(
+            nn.Linear(seq_len, 16),
+        )
+
+        self.reg_head = nn.Sequential(
+            nn.Linear(n_news_features+16, 16),
+            nn.Tanh(),
+            nn.Linear(16, 4),
+            nn.Tanh(),
+            nn.Linear(4, 1)
+        )
+
+    def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
+        if self.n_news_features > 0:
+            # news feature extaction
+            batch_size = x_news_input_ids.shape[0]
+            # TODO find out whether to compute gradients for bert
+
+            with torch.no_grad():
+                x_news_input_ids = x_news_input_ids.flatten(start_dim=0, end_dim=1)
+                x_news_attention_mask = x_news_attention_mask.flatten(start_dim=0, end_dim=1)
+                bert_out = self.bert(
+                    input_ids=x_news_input_ids,
+                    attention_mask=x_news_attention_mask,
+                    output_hidden_states=True,
+                    return_dict=True
+                )
+                print(bert_out.keys())
+                print(bert_out['pooler_output'].shape)
+                print(bert_out['last_hidden_state'].shape)
+
+                print(bert_out['hidden_states'][0].shape)
+                print(bert_out['hidden_states'][1].shape)
+                print(bert_out['hidden_states'][2].shape)
+                print(bert_out['hidden_states'][3].shape)
+                print(len(bert_out['hidden_states']))
+                last_hidden_state = bert_out['last_hidden_state'].unflatten(0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size)))
+
+            # TODO use attention layer as feature extractor
+            # TODO find out which part of last_hidden_state to use for output
+            print(last_hidden_state[:, :, 0, :].shape)
+            cls_token = torch.permute(last_hidden_state[:, :, 0, :], (0, 2, 1))
+            print(cls_token.shape)
+            news_fv = self.text_feature_ext(cls_token)
+
+            # price feature extraction
+            print(x_price.shape)
+            x_price = torch.permute(x_price, (0, 2, 1))
+            price_fv = self.price_feature_ext(x_price)
+
+            # cat price with news features
+            print(news_fv.shape)
+            print(price_fv.shape)
+            x = torch.cat((price_fv, news_fv), dim=2)
+        else:
+            x_price = torch.permute(x_price, (0, 2, 1))
+            x = self.price_feature_ext(x_price)
+
+        y = self.reg_head(x)
 
         return y, state
 
