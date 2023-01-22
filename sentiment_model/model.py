@@ -12,14 +12,13 @@ class StockPriceModel(nn.Module):
             for param in self.sentiment_bert.parameters():
                 param.requires_grad = False
         """
-        self.rnn = nn.GRU(
+        self.sequence_model = nn.GRU(
             input_size=1 + 3*news_features,
             hidden_size=rnn_hidden_size,
             num_layers=rnn_n_layers,
             batch_first=True,
         )
         self.linear = nn.Linear(rnn_hidden_size, 1)
-        """
         """
         self.fc_arn = nn.Sequential(
             nn.Linear((1 + 3*news_features) * seq_len, 16),
@@ -41,7 +40,7 @@ class StockPriceModel(nn.Module):
             nn.Tanh(),
             nn.Linear(32, 1)
         )
-
+        """
 
     def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
         if self.news_features:
@@ -61,12 +60,10 @@ class StockPriceModel(nn.Module):
             x = torch.cat((x_price, sentiment), dim=2)
         else:
             x = x_price
-
+        """
         # run rnn
-        """
         y, state = self.sequence_model(x, state)
-        y = self.rnn(y[:, -1, :])
-        """
+        y = self.linear(y[:, -1, :])
         """
         x = x.flatten(start_dim=1, end_dim=2)
         y = self.fc_arn(x)
@@ -75,5 +72,6 @@ class StockPriceModel(nn.Module):
         x = self.conv_arn(x)
         x = x.flatten(start_dim=1, end_dim=2)
         y = self.conv_arn_head(x)
+        """
 
         return y, state
