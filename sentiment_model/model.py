@@ -20,7 +20,7 @@ class StockPriceModel(nn.Module):
         )
         self.linear = nn.Linear(rnn_hidden_size, 1)
         """
-
+        """
         self.fc_arn = nn.Sequential(
             nn.Linear((1 + 3*news_features) * seq_len, 16),
             nn.Tanh(),
@@ -41,7 +41,7 @@ class StockPriceModel(nn.Module):
             nn.Tanh(),
             nn.Linear(32, 1)
         )
-        """
+
 
     def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
         if self.news_features:
@@ -67,7 +67,7 @@ class StockPriceModel(nn.Module):
         y, state = self.sequence_model(x, state)
         y = self.rnn(y[:, -1, :])
         """
-
+        """
         x = x.flatten(start_dim=1, end_dim=2)
         y = self.fc_arn(x)
         """
@@ -75,6 +75,5 @@ class StockPriceModel(nn.Module):
         x = self.conv_arn(x)
         x = x.flatten(start_dim=1, end_dim=2)
         y = self.conv_arn_head(x)
-        """
 
         return y, state
