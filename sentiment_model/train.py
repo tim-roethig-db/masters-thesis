@@ -110,7 +110,7 @@ if __name__ == '__main__':
             p = 100 // batch_size
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
-                #print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/(p*batch_size):.5f}')
+                print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/(p*batch_size):.5f}')
                 loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/(p*batch_size)).item()])
 
                 batch_monitor_loss = 0
