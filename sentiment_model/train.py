@@ -12,7 +12,7 @@ if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
     epochs = 10
-    news_features = True
+    news_features = False
     rnn_n_layers = 1
     rnn_hidden_size = 16
     seq_len = 32
@@ -26,7 +26,8 @@ if __name__ == '__main__':
     model = StockPriceModel(
         news_features=news_features,
         rnn_n_layers=rnn_n_layers,
-        rnn_hidden_size=rnn_hidden_size
+        rnn_hidden_size=rnn_hidden_size,
+        seq_len=seq_len
     ).float()
     #model = torch.nn.DataParallel(model)
     model = model.to(device)
@@ -54,7 +55,7 @@ if __name__ == '__main__':
         seq_len=seq_len,
         test_len=1,
     )
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, drop_last=True)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True)
     print(f'Series length: {len(train_set)}')
 
     print('Start train loop...')
@@ -90,7 +91,7 @@ if __name__ == '__main__':
 
             # get prediction
             y_pred, state = model(x_price, x_news_input_ids, x_news_attention_mask, state)
-            state = state.detach()
+            #state = state.detach()
             #state = [x.detach() for x in state]
             #y_pred = torch.zeros(1)
             #state = None
@@ -109,7 +110,7 @@ if __name__ == '__main__':
             p = 100 // batch_size
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
-                print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/(p*batch_size):.5f}')
+                #print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/(p*batch_size):.5f}')
                 loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/(p*batch_size)).item()])
 
                 batch_monitor_loss = 0

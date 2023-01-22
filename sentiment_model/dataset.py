@@ -32,9 +32,9 @@ class Dataset(torch.utils.data.Dataset):
         df = df[['index', 'title', 'alpha', 'input_ids', 'attention_mask', 'length']]
 
         if not testing:
-            df = df.drop(df.tail(len(df)-3000).index)
+            df = df.drop(df.tail(len(df)-3300).index)
         elif testing:
-            df = df.drop(df.head(3000).index)
+            df = df.drop(df.head(3300).index)
 
         df['title'] = df['title'].shift(-lag)
         df = df.drop(df.tail(lag).index)
