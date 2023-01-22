@@ -35,10 +35,7 @@ class StockPriceModel(nn.Module):
                     return_dict=True
                 )
                 sentiment = bert_out['logits'].unflatten(0, (batch_size, int(bert_out['logits'].shape[0] / batch_size)))
-                print(sentiment)
             # cat price with news features
-            print(sentiment.shape)
-            print(x_price.shape)
             x = torch.cat((x_price, sentiment), dim=2)
         else:
             x = x_price

@@ -9,7 +9,7 @@ from model import StockPriceModel
 
 
 if __name__ == '__main__':
-    batch_size = 2
+    batch_size = 16
     lr = 0.0001
     epochs = 10
     news_features = True
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
         # iter over batches
         for batch_idx, (time_stamp, x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
-            print(batch_idx)
+            #print(batch_idx)
             """
             if torch.cuda.is_available():
                 for i in range(4):
