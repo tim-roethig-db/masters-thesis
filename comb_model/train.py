@@ -5,7 +5,7 @@ import torch
 #from pynvml import *
 
 from dataset import Dataset
-from model import StockPriceModel, StockPriceModelARN
+from model import StockPriceModel, StockPriceModelARN, StockPriceModelTransformer
 
 
 if __name__ == '__main__':
@@ -30,8 +30,13 @@ if __name__ == '__main__':
         rnn_n_layers=rnn_n_layers,
         rnn_hidden_size=rnn_hidden_size
     ).float()
-    """
+    
     model = StockPriceModelARN(
+        n_news_features=n_news_features,
+        seq_len=seq_len
+    ).float()
+    """
+    model = StockPriceModelTransformer(
         n_news_features=n_news_features,
         seq_len=seq_len
     ).float()

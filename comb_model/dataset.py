@@ -233,7 +233,6 @@ class Dataset(torch.utils.data.Dataset):
 
         df['title'] = df['title'].shift(-lag)
         df = df.drop(df.tail(lag).index)
-        print(df.loc[676, 'title'])
 
         self.x = df.values
 
