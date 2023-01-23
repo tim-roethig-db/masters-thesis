@@ -40,7 +40,8 @@ class StockPriceModel(nn.Module):
                     attention_mask=x_news_attention_mask,
                     return_dict=False
                 )
-                last_hidden_state = last_hidden_state.unflatten(0, (batch_size, int(last_hidden_state.shape[0] / batch_size)))
+                last_hidden_state = last_hidden_state.unflatten(0, (
+                batch_size, int(last_hidden_state.shape[0] / batch_size)))
 
             # TODO use attention layer as feature extractor
             # TODO find out which part of last_hidden_state to use for output
@@ -108,7 +109,7 @@ class StockPriceModelARN(nn.Module):
         )
 
         self.reg_head = nn.Sequential(
-            nn.Linear(n_news_features+16, 16),
+            nn.Linear(n_news_features + 16, 16),
             nn.Tanh(),
             nn.Linear(16, 4),
             nn.Tanh(),
@@ -139,7 +140,8 @@ class StockPriceModelARN(nn.Module):
                 print(bert_out['hidden_states'][2].shape)
                 print(bert_out['hidden_states'][3].shape)
                 print(len(bert_out['hidden_states']))
-                last_hidden_state = bert_out['last_hidden_state'].unflatten(0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size)))
+                last_hidden_state = bert_out['last_hidden_state'].unflatten(0, (
+                batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size)))
 
             # TODO use attention layer as feature extractor
             # TODO find out which part of last_hidden_state to use for output
@@ -166,15 +168,36 @@ class StockPriceModelARN(nn.Module):
         return y, state
 
 
+class SineActivation(nn.Module):
+    def __init__(self, in_features, out_features):
+        super(SineActivation, self).__init__()
+        self.out_features = out_features
+        self.w0 = nn.parameter.Parameter(torch.randn(in_features, 1))
+        self.b0 = nn.parameter.Parameter(torch.randn(1))
+        self.w = nn.parameter.Parameter(torch.randn(in_features, out_features - 1))
+        self.b = nn.parameter.Parameter(torch.randn(out_features - 1))
+        self.f = torch.sin
+
+    def forward(self, tau):
+        v1 = torch.matmul(tau, self.w0) + self.b0
+        v2 = self.f(torch.matmul(tau, self.w) + self.b)
+
+
+        return torch.cat([v1, v2], dim=2)
+
+
 class Time2Vec(nn.Module):
     def __init__(self, seq_len: int):
         super(Time2Vec, self).__init__()
 
-        self.linear = nn.Linear()
+        self.l1 = SineActivation(1, seq_len)
+        self.fc1 = nn.Linear(seq_len, 2)
 
-    def forward(self, x_price):
-        pass
+    def forward(self, x):
+        x = self.l1(x)
+        x = self.fc1(x)
 
+        return x
 
 
 class StockPriceModelTransformer(nn.Module):
@@ -191,6 +214,8 @@ class StockPriceModelTransformer(nn.Module):
                 nn.Linear(768, n_news_features),
                 nn.Tanh()
             )
+
+        self.t2v = Time2Vec(seq_len)
 
     def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
         if self.n_news_features > 0:
@@ -209,14 +234,17 @@ class StockPriceModelTransformer(nn.Module):
                 0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size))
             )
             cls = last_hidden_state[:, :, 0, :]
-
             pooler_output = self.custom_pooler(cls)
-
             transformer_in = torch.cat((x_price, pooler_output), dim=2)
-            print(transformer_in.shape)
 
         else:
-            pass
+            transformer_in = x_price
+
+        print(transformer_in.shape)
+
+        t2v_embedding = self.t2v(transformer_in)
+
+        print(t2v_embedding.shape)
 
         return y, state
 

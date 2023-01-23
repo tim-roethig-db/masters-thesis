@@ -16,7 +16,7 @@ if __name__ == '__main__':
     rnn_n_layers = 1
     rnn_hidden_size = 16
     seq_len = 32
-    lag = 0
+    lag = 1
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
