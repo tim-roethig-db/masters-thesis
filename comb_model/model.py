@@ -168,36 +168,23 @@ class StockPriceModelARN(nn.Module):
         return y, state
 
 
-class SineActivation(nn.Module):
-    def __init__(self, in_features, out_features):
-        super(SineActivation, self).__init__()
-        self.out_features = out_features
-        self.w0 = nn.parameter.Parameter(torch.randn(in_features, 1))
-        self.b0 = nn.parameter.Parameter(torch.randn(1))
-        self.w = nn.parameter.Parameter(torch.randn(in_features, out_features - 1))
-        self.b = nn.parameter.Parameter(torch.randn(out_features - 1))
-        self.f = torch.sin
-
-    def forward(self, tau):
-        v1 = torch.matmul(tau, self.w0) + self.b0
-        v2 = self.f(torch.matmul(tau, self.w) + self.b)
-
-
-        return torch.cat([v1, v2], dim=2)
-
-
 class Time2Vec(nn.Module):
-    def __init__(self, seq_len: int):
+    def __init__(self, in_features: int, out_features: int):
         super(Time2Vec, self).__init__()
 
-        self.l1 = SineActivation(1, seq_len)
-        self.fc1 = nn.Linear(seq_len, 2)
+        self.out_features = out_features
+        self.w_linear = nn.parameter.Parameter(torch.randn(in_features, 1))
+        self.b_linear = nn.parameter.Parameter(torch.randn(1))
+        self.w_periodic = nn.parameter.Parameter(torch.randn(in_features, out_features - 1))
+        self.b_periodic = nn.parameter.Parameter(torch.randn(out_features - 1))
 
-    def forward(self, x):
-        x = self.l1(x)
-        x = self.fc1(x)
+    def forward(self, tau):
+        linear = torch.matmul(tau, self.w_linear) + self.b_linear
+        periodic = torch.sin(torch.matmul(tau, self.w_periodic) + self.b_periodic)
 
-        return x
+        t2v = torch.cat([linear, periodic], dim=2)
+
+        return t2v
 
 
 class StockPriceModelTransformer(nn.Module):
@@ -215,7 +202,28 @@ class StockPriceModelTransformer(nn.Module):
                 nn.Tanh()
             )
 
-        self.t2v = Time2Vec(seq_len)
+        self.t2v = Time2Vec(n_news_features+1, 2*(n_news_features+1))
+
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=3*(1+n_news_features),
+            nhead=4,
+            dim_feedforward=64,
+            batch_first=True,
+        )
+        self.encoder = nn.TransformerEncoder(
+            encoder_layer,
+            num_layers=2,
+        )
+
+        self.global_avg_pooling = nn.AvgPool1d(3*(1+n_news_features))
+
+        self.reg_head = nn.Sequential(
+            nn.Dropout(0.1),
+            nn.Linear(seq_len, 64),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(64, 1)
+        )
 
     def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
         if self.n_news_features > 0:
@@ -235,16 +243,27 @@ class StockPriceModelTransformer(nn.Module):
             )
             cls = last_hidden_state[:, :, 0, :]
             pooler_output = self.custom_pooler(cls)
-            transformer_in = torch.cat((x_price, pooler_output), dim=2)
+            x = torch.cat((x_price, pooler_output), dim=2)
 
         else:
-            transformer_in = x_price
+            x = x_price
+        print(x.shape)
 
+        t2v_embedding = self.t2v(x)
+        print(t2v_embedding.shape)
+
+        transformer_in = torch.cat((t2v_embedding, x), dim=2)
         print(transformer_in.shape)
 
-        t2v_embedding = self.t2v(transformer_in)
+        transformer_out = self.encoder(transformer_in)
+        print(transformer_out.shape)
 
-        print(t2v_embedding.shape)
+        x = self.global_avg_pooling(transformer_out)
+        x = x[:, :, 0]
+        print(x.shape)
+
+        y = self.reg_head(x)
+        print(y.shape)
 
         return y, state
 
