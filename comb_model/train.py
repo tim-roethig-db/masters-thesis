@@ -10,10 +10,10 @@ from model import StockPriceModel, StockPriceModelARN, StockPriceModelTransforme
 
 if __name__ == '__main__':
     print(torch.get_num_threads())
-    batch_size = 2
+    batch_size = 16
     lr = 0.0001
-    epochs = 10
-    n_news_features = 3
+    epochs = 100
+    n_news_features = 16
     rnn_n_layers = 1
     rnn_hidden_size = 16
     seq_len = 32
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
         # iter over batches
         for batch_idx, (time_stamp, x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
-            print(batch_idx)
+            #print(batch_idx)
             """
             if torch.cuda.is_available():
                 for i in range(4):

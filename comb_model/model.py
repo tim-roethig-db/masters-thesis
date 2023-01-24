@@ -206,7 +206,7 @@ class StockPriceModelTransformer(nn.Module):
 
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=3*(1+n_news_features),
-            nhead=4,
+            nhead=3,
             dim_feedforward=64,
             batch_first=True,
         )
@@ -247,23 +247,17 @@ class StockPriceModelTransformer(nn.Module):
 
         else:
             x = x_price
-        print(x.shape)
 
         t2v_embedding = self.t2v(x)
-        print(t2v_embedding.shape)
 
         transformer_in = torch.cat((t2v_embedding, x), dim=2)
-        print(transformer_in.shape)
 
         transformer_out = self.encoder(transformer_in)
-        print(transformer_out.shape)
 
         x = self.global_avg_pooling(transformer_out)
         x = x[:, :, 0]
-        print(x.shape)
 
         y = self.reg_head(x)
-        print(y.shape)
 
         return y, state
 
