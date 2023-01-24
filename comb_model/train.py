@@ -11,7 +11,7 @@ from model import StockPriceModel, StockPriceModelARN, StockPriceModelTransforme
 if __name__ == '__main__':
     print(torch.get_num_threads())
     batch_size = 16
-    lr = 0.0001
+    lr = 0.001
     epochs = 100
     n_news_features = 16
     rnn_n_layers = 1
@@ -108,9 +108,9 @@ if __name__ == '__main__':
             #state = None
 
             # compute loss
-            batch_loss = loss(y_pred, y)
+            batch_loss = loss(y_pred, y[:, :, 0])
             epoch_loss += batch_loss
-            monitor_loss = mae_loss(y_pred, y)
+            monitor_loss = mae_loss(y_pred, y[:, :, 0])
             epoch_monitor_loss += monitor_loss
 
             # perform gradient step
@@ -121,7 +121,7 @@ if __name__ == '__main__':
             p = 100 // batch_size
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
-                print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/(p*batch_size):.5f}')
+                #print(f'{t_min} to {time_stamp.max()}: MAELoss: {batch_monitor_loss/(p*batch_size):.5f}')
                 loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/(p*batch_size)).item()])
 
                 batch_monitor_loss = 0
