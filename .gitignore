@@ -4,5 +4,6 @@
 *.zip
 *.idea
 *.t7
+*.sbatch
 /data/
 /models/

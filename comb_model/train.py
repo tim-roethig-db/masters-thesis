@@ -5,19 +5,18 @@ import torch
 #from pynvml import *
 
 from dataset import Dataset
-from model import StockPriceModel, StockPriceModelARN, StockPriceModelTransformer
+from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransformer
 
 
 if __name__ == '__main__':
-    print(torch.get_num_threads())
-    batch_size = 16
+    batch_size = 2
     lr = 0.001
-    epochs = 100
-    n_news_features = 16
+    epochs = 10
+    n_news_features = 8
     rnn_n_layers = 1
     rnn_hidden_size = 16
-    seq_len = 32
-    lag = 0
+    seq_len = 10
+    lag = 1
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -25,12 +24,12 @@ if __name__ == '__main__':
 
     print('Loaded model to device...')
     """
-    model = StockPriceModel(
+    model = StockPriceModelRNN(
         n_news_features=n_news_features,
         rnn_n_layers=rnn_n_layers,
         rnn_hidden_size=rnn_hidden_size
     ).float()
-    
+    """
     model = StockPriceModelARN(
         n_news_features=n_news_features,
         seq_len=seq_len
@@ -40,6 +39,7 @@ if __name__ == '__main__':
         n_news_features=n_news_features,
         seq_len=seq_len
     ).float()
+    """
     #model = torch.nn.DataParallel(model)
     model = model.to(device)
 
@@ -53,14 +53,17 @@ if __name__ == '__main__':
     )
 
     print('Setup loss function...')
-    loss = torch.nn.MSELoss().to(device)
+    #loss = torch.nn.MSELoss().to(device)
+    loss = torch.nn.BCELoss().to(device)
     mae_loss = torch.nn.L1Loss(reduction='sum').to(device)
 
     print('Start training...')
-    df = pd.read_csv('../data/dataset.csv', sep=';', index_col='time_stamp')
+    news_df = pd.read_csv('../data/rwe_news_dataset.csv', sep=';')
+    price_df = pd.read_csv('../data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
     print('Set up Data Loader...')
     train_set = Dataset(
-        df=df,
+        news_df=news_df,
+        price_df=price_df,
         testing=False,
         lag=lag,
         seq_len=seq_len,
@@ -104,19 +107,22 @@ if __name__ == '__main__':
             y_pred, state = model(x_price, x_news_input_ids, x_news_attention_mask, state)
             #state = state.detach()
             #state = [x.detach() for x in state]
-            #y_pred = torch.zeros(1)
+            #y_pred = torch.ones((batch_size, 1))
             #state = None
 
             # compute loss
-            batch_loss = loss(y_pred, y[:, :, 0])
+            #y = y[:, :, 0]
+            y_pred_class = (y_pred > 0.5).float()
+            batch_loss = loss(y_pred, y)
             epoch_loss += batch_loss
-            monitor_loss = mae_loss(y_pred, y[:, :, 0])
+            #monitor_loss = mae_loss(y_pred, y)
+            monitor_loss = torch.sum(y_pred_class == y)
             epoch_monitor_loss += monitor_loss
 
             # perform gradient step
             model.zero_grad()
-            batch_loss.backward()
-            optimizer.step()
+            #batch_loss.backward()
+            #optimizer.step()
 
             p = 100 // batch_size
             if (batch_idx+1) % p == 0:
@@ -128,18 +134,20 @@ if __name__ == '__main__':
                 t_min = time_stamp.min() + batch_size
             else:
                 batch_monitor_loss += monitor_loss
-
+        print(epoch_loss)
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
-    print('Save loss history...')
+    print('Save model...')
+    file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
+    os.system(f'mkdir {file_name}')
+
     loss_df = pd.DataFrame(
         columns=['epoch', 'iteration', 'MAE'],
         data=loss_df
     )
-    loss_df.to_csv('train_loss.csv', index=False, sep=';')
+    loss_df.to_csv(f'{file_name}/train_loss.csv', index=False, sep=';')
 
-    print('Save model...')
-    torch.save(model.state_dict(), 'model.t7')
+    torch.save(model.state_dict(), f'{file_name}/model.t7')
     pd.DataFrame({
         'batch_size': [batch_size],
         'lr': lr,
@@ -149,9 +157,8 @@ if __name__ == '__main__':
         'rnn_hidden_size': rnn_hidden_size,
         'seq_len': seq_len,
         'lag': lag
-    }).to_json('conf.json')
+    }).to_json(f'{file_name}/conf.json')
 
-    print('Zip files for download...')
-    os.system(f'zip ./model_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}.zip train_loss.csv model.t7 conf.json')
+    os.system(f'zip -r {file_name}.zip {file_name}')
 
 
