@@ -142,7 +142,7 @@ if __name__ == '__main__':
     print('Save model...')
     path = '~/'
     file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
-    os.system(f'mkdir {file_name}')
+    os.system(f'mkdir {path}{file_name}')
 
     loss_df = pd.DataFrame(
         columns=['epoch', 'iteration', 'MAE'],
