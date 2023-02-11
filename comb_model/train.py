@@ -149,7 +149,7 @@ if __name__ == '__main__':
         columns=['epoch', 'iteration', 'MAE'],
         data=loss_df
     )
-    loss_df.to_csv(f'~/home/mollik/{file_name}/train_loss.csv', index=False, sep=';')
+    loss_df.to_csv(f'{path}/train_loss.csv', index=False, sep=';')
 
     pd.DataFrame({
         'batch_size': [batch_size],
@@ -161,6 +161,6 @@ if __name__ == '__main__':
         'seq_len': seq_len,
         'lag': lag
     }).to_json(f'{path}/conf.json')
-    torch.save(model.state_dict(), f'{path}/model.t7')
+    torch.save(model.state_dict(), f'~/home/mollik/{file_name}/model.t7')
 
     os.system(f'zip -r {path}.zip {path}')
