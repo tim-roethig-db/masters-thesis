@@ -161,7 +161,7 @@ if __name__ == '__main__':
         'seq_len': seq_len,
         'lag': lag
     }).to_json(f'{path}/conf.json')
-    print(os.path.abspath('.'))
+    print(os.path.join(os.path.dirname(os.path.abspath('.'))), file_name)
     torch.save(model.state_dict(), f'~/home/mollik/{file_name}/model.t7')
 
     os.system(f'zip -r {path}.zip {path}')
