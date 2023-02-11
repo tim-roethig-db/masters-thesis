@@ -125,7 +125,6 @@ if __name__ == '__main__':
             model.zero_grad()
             batch_loss.backward()
             optimizer.step()
-            break
 
             p = 100 // batch_size
             if (batch_idx+1) % p == 0:
@@ -161,7 +160,7 @@ if __name__ == '__main__':
         'seq_len': seq_len,
         'lag': lag
     }).to_json(f'{path}/conf.json')
-    print(os.path.join(os.path.dirname(os.path.abspath('.'))))
+
     torch.save(model.state_dict(), f'/home/mollik/{file_name}/model.t7')
 
-    os.system(f'zip -r {path}.zip {path}')
+    #os.system(f'zip -r {path}.zip {path}')
