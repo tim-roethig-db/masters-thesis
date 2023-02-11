@@ -11,7 +11,7 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
-    epochs = 1
+    epochs = 10
     n_news_features = 16
     rnn_n_layers = 1
     rnn_hidden_size = 16
@@ -142,7 +142,7 @@ if __name__ == '__main__':
             p = 100 // batch_size
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
-                print(f'Acc: {batch_monitor_loss/(p*batch_size):.5f}')
+                #print(f'Acc: {batch_monitor_loss/(p*batch_size):.5f}')
                 loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/(p*batch_size)).item()])
 
                 batch_monitor_loss = 0
