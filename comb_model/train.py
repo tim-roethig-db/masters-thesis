@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 import pandas as pd
 import torch
-#from pynvml import *
+from pynvml import *
 
 from dataset import Dataset
 from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransformer
@@ -88,7 +88,7 @@ if __name__ == '__main__':
         # iter over batches
         for batch_idx, (time_stamp, x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
             #print(batch_idx)
-            """
+
             if torch.cuda.is_available():
                 for i in range(4):
                     nvmlInit()
@@ -98,7 +98,7 @@ if __name__ == '__main__':
                     print(f'{i}_free : {info.free/1024**2}')
                     print(f'{i}_used : {info.used/1024**2}')
                 print('------------------------------------------------')
-            """
+
             # move data to device
             x_price = x_price.to(device)
             x_news_input_ids = x_news_input_ids.to(device)
