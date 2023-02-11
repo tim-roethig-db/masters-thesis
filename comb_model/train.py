@@ -11,7 +11,7 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
-    epochs = 1
+    epochs = 10
     n_news_features = 16
     rnn_n_layers = 1
     rnn_hidden_size = 16
@@ -88,7 +88,7 @@ if __name__ == '__main__':
         # iter over batches
         for batch_idx, (time_stamp, x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
             #print(batch_idx)
-
+            """
             if torch.cuda.is_available():
                 for i in range(4):
                     nvmlInit()
@@ -98,7 +98,7 @@ if __name__ == '__main__':
                     print(f'{i}_free : {info.free/1024**2}')
                     print(f'{i}_used : {info.used/1024**2}')
                 print('------------------------------------------------')
-
+            """
             # move data to device
             x_price = x_price.to(device)
             x_news_input_ids = x_news_input_ids.to(device)
@@ -110,7 +110,7 @@ if __name__ == '__main__':
             #state = state.detach()
             #state = [x.detach() for x in state]
             #y_pred = torch.ones((batch_size, 1))
-            #state = None
+            state = None
 
             # compute loss
             #y = y[:, :, 0]
@@ -136,8 +136,7 @@ if __name__ == '__main__':
                 t_min = time_stamp.min() + batch_size
             else:
                 batch_monitor_loss += monitor_loss
-        print(epoch_loss)
-        print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
+        print(f'EPOCH: {epoch} of {epochs}: BCELoss: {epoch_loss/len(train_set):.5f}, Acc: {epoch_monitor_loss/len(train_set):.5f}')
 
     print('Save model...')
     file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
