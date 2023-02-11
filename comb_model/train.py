@@ -149,7 +149,7 @@ if __name__ == '__main__':
         columns=['epoch', 'iteration', 'MAE'],
         data=loss_df
     )
-    loss_df.to_csv(f'{path}/train_loss.csv', index=False, sep=';')
+    loss_df.to_csv(f'~/home/mollik/{file_name}/train_loss.csv', index=False, sep=';')
 
     pd.DataFrame({
         'batch_size': [batch_size],
