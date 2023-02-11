@@ -68,7 +68,8 @@ class StockPriceModelARN(nn.Module):
         self.n_news_features = n_news_features
 
         if self.n_news_features > 0:
-            self.bert = BertModel.from_pretrained('../models/finbert')
+            #self.bert = BertModel.from_pretrained('../models/finbert')
+            self.bert = BertModel.from_pretrained('finbert')
             for param in self.bert.parameters():
                 param.requires_grad = False
 
