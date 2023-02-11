@@ -11,7 +11,7 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
-    epochs = 10
+    epochs = 1
     n_news_features = 16
     rnn_n_layers = 1
     rnn_hidden_size = 16
@@ -70,9 +70,20 @@ if __name__ == '__main__':
         lag=lag,
         seq_len=seq_len,
         test_len=1,
+        sample=True
     )
+
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True)
-    print(f'Series length: {len(train_set)}')
+    test_set = Dataset(
+        news_df=news_df,
+        price_df=price_df,
+        testing=True,
+        lag=lag,
+        seq_len=seq_len,
+        test_len=1,
+        sample=True
+    )
+    test_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True)
 
     print('Start train loop...')
     loss_df = list()
@@ -80,13 +91,15 @@ if __name__ == '__main__':
         epoch_loss = 0
         epoch_monitor_loss = 0
         batch_monitor_loss = 0
-        t_min = 0
+
+        epoch_loss_test = 0
+        epoch_monitor_loss_test = 0
 
         # reset state every epoch
         state = None
 
         # iter over batches
-        for batch_idx, (time_stamp, x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
+        for batch_idx, (x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
             #print(batch_idx)
             """
             if torch.cuda.is_available():
@@ -129,14 +142,42 @@ if __name__ == '__main__':
             p = 100 // batch_size
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
-                print(f'{t_min} to {time_stamp.max()}: Acc: {batch_monitor_loss/(p*batch_size):.5f}')
+                print(f'Acc: {batch_monitor_loss/(p*batch_size):.5f}')
                 loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/(p*batch_size)).item()])
 
                 batch_monitor_loss = 0
-                t_min = time_stamp.min() + batch_size
             else:
                 batch_monitor_loss += monitor_loss
-        print(f'EPOCH: {epoch} of {epochs}: BCELoss: {epoch_loss/len(train_set):.5f}, Acc: {epoch_monitor_loss/len(train_set):.5f}')
+
+        model.eval()
+        with torch.no_grad():
+            for batch_idx, (x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(test_loader):
+                # move data to device
+                x_price = x_price.to(device)
+                x_news_input_ids = x_news_input_ids.to(device)
+                x_news_attention_mask = x_news_attention_mask.to(device)
+                y = y.to(device)
+
+                # get prediction
+                y_pred, state = model(x_price, x_news_input_ids, x_news_attention_mask, state)
+                #state = state.detach()
+                #state = [x.detach() for x in state]
+                #y_pred = torch.ones((batch_size, 1))
+                state = None
+
+                # compute loss
+                #y = y[:, :, 0]
+                y_pred_class = (y_pred > 0.5).float()
+                epoch_loss_test += loss(y_pred, y)
+                epoch_monitor_loss_test += torch.sum(y_pred_class == y)
+        model.train()
+        print(
+            f'''
+            EPOCH: {epoch} of {epochs}: 
+            Train: BCELoss: {epoch_loss/len(train_set):.5f}, Acc: {epoch_monitor_loss/len(train_set):.5f}
+            Test: BCELoss: {epoch_loss_test/len(test_set):.5f}, Acc: {epoch_monitor_loss_test/len(test_set):.5f}
+            '''
+        )
 
     print('Save model...')
     file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'

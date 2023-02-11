@@ -9,7 +9,8 @@ pd.set_option('expand_frame_repr', False)
 
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, news_df: pd.DataFrame, price_df: pd.DataFrame, testing: bool, lag: int, seq_len: int, test_len: int):
+    def __init__(self, news_df: pd.DataFrame, price_df: pd.DataFrame, testing: bool, lag: int, seq_len: int,
+                 test_len: int, sample: bool):
         self.dtype = 'float32'
         self.seq_len = seq_len
         self.test_len = test_len
@@ -35,6 +36,9 @@ class Dataset(torch.utils.data.Dataset):
 
         df['title'] = df['title'].shift(-lag)
         df = df.drop(df.tail(lag).index)
+
+        if sample:
+            df = df.sample(frac=1, random_state=42).reset_index(drop=True)
 
         if not testing:
             df = df.drop(df.tail(len(df)-3000).index)
@@ -62,29 +66,27 @@ class Dataset(torch.utils.data.Dataset):
         df.loc[df['alpha'] > 0, 'up'] = 1
 
         df = df.reset_index().reset_index()
-        df = df[['index', 'alpha', 'input_ids', 'attention_mask', 'up']]
+        df = df[['alpha', 'input_ids', 'attention_mask', 'up']]
 
         self.x = df.values
 
     def __getitem__(self, idx: int):
-        time_stamp = self.x[idx:(idx + self.seq_len), 0].astype(int)
-
-        x_price = torch.from_numpy(self.x[idx:(idx+self.seq_len), 1].astype(self.dtype))
+        x_price = torch.from_numpy(self.x[idx:(idx+self.seq_len), 0].astype(self.dtype))
         x_price = x_price[:, None]
 
         x_news_input_ids = torch.stack(
-            [x[0] for x in self.x[idx:(idx+self.seq_len), 2]],
+            [x[0] for x in self.x[idx:(idx+self.seq_len), 1]],
             dim=0
         )
         x_news_attention_mask = torch.stack(
-            [x[0] for x in self.x[idx:(idx+self.seq_len), 3]],
+            [x[0] for x in self.x[idx:(idx+self.seq_len), 2]],
             dim=0
         )
 
         #y = torch.from_numpy(self.x[(idx+self.seq_len):(idx+self.seq_len+self.test_len), 1].astype(self.dtype))
-        y = torch.from_numpy(np.array([self.x[(idx+self.seq_len), 4]]).astype(self.dtype))
+        y = torch.from_numpy(np.array([self.x[(idx+self.seq_len), 3]]).astype(self.dtype))
 
-        return time_stamp, x_price, x_news_input_ids, x_news_attention_mask, y
+        return x_price, x_news_input_ids, x_news_attention_mask, y
 
     def __len__(self):
         return len(self.x) - self.seq_len
@@ -94,6 +96,6 @@ if __name__ == '__main__':
     news_df = pd.read_csv('../data/rwe_news_dataset.csv', sep=';')
     price_df = pd.read_csv('../data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
 
-    ds = Dataset(news_df, price_df, testing=False, lag=1, seq_len=5, test_len=2)
+    ds = Dataset(news_df, price_df, testing=True, lag=1, seq_len=5, test_len=1, sample=True)
 
     print(ds[0])
