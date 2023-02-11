@@ -83,7 +83,7 @@ if __name__ == '__main__':
         test_len=1,
         sample=True
     )
-    test_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=True, drop_last=True)
 
     print('Start train loop...')
     loss_df = list()
