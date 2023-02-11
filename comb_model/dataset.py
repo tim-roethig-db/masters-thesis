@@ -15,7 +15,7 @@ class Dataset(torch.utils.data.Dataset):
         self.test_len = test_len
 
         #tokenizer = BertTokenizer.from_pretrained('../models/finbert')
-        tokenizer = BertTokenizer.from_pretrained('finbert')
+        tokenizer = BertTokenizer.from_pretrained('ProsusAI/finbert')
 
         news_df = news_df[~news_df['topic'].isin([-1])]
         news_df = news_df.groupby('time_stamp')['title'].apply(lambda x: ' '.join(x.values))
