@@ -11,7 +11,7 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 if __name__ == '__main__':
     batch_size = 8
     lr = 0.001
-    epochs = 10
+    epochs = 1
     n_news_features = 16
     rnn_n_layers = 1
     rnn_hidden_size = 16
