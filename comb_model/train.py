@@ -9,14 +9,14 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 
 
 if __name__ == '__main__':
-    batch_size = 2
+    batch_size = 8
     lr = 0.001
     epochs = 10
-    n_news_features = 8
+    n_news_features = 16
     rnn_n_layers = 1
     rnn_hidden_size = 16
     seq_len = 10
-    lag = 1
+    lag = 0
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
