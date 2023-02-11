@@ -141,17 +141,16 @@ if __name__ == '__main__':
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
     print('Save model...')
-    path = '~/'
     file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
-    os.system(f'mkdir {path}{file_name}')
+    path = f'~/{file_name}'
+    os.system(f'mkdir {path}')
 
     loss_df = pd.DataFrame(
         columns=['epoch', 'iteration', 'MAE'],
         data=loss_df
     )
-    loss_df.to_csv(f'{path}{file_name}/train_loss.csv', index=False, sep=';')
+    loss_df.to_csv(f'{path}/train_loss.csv', index=False, sep=';')
 
-    torch.save(model.state_dict(), f'{path}{file_name}/model.t7')
     pd.DataFrame({
         'batch_size': [batch_size],
         'lr': lr,
@@ -161,8 +160,7 @@ if __name__ == '__main__':
         'rnn_hidden_size': rnn_hidden_size,
         'seq_len': seq_len,
         'lag': lag
-    }).to_json(f'{path}{file_name}/conf.json')
+    }).to_json(f'{path}/conf.json')
+    torch.save(model.state_dict(), f'{path}/model.t7')
 
-    os.system(f'zip -r {path}{file_name}.zip {path}{file_name}')
-
-
+    os.system(f'zip -r {path}.zip {path}')
