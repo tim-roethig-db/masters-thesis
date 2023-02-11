@@ -123,8 +123,8 @@ if __name__ == '__main__':
 
             # perform gradient step
             model.zero_grad()
-            #batch_loss.backward()
-            #optimizer.step()
+            batch_loss.backward()
+            optimizer.step()
 
             p = 100 // batch_size
             if (batch_idx+1) % p == 0:
