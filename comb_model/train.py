@@ -140,7 +140,7 @@ if __name__ == '__main__':
         print(f'EPOCH: {epoch} of {epochs}: MSELoss: {epoch_loss/len(train_set):.5f}, MAELoss: {epoch_monitor_loss/len(train_set):.5f}')
 
     print('Save model...')
-    path = '/home/mollik/'
+    path = '~/'
     file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
     os.system(f'mkdir {file_name}')
 
