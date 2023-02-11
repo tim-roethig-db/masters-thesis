@@ -125,6 +125,7 @@ if __name__ == '__main__':
             model.zero_grad()
             batch_loss.backward()
             optimizer.step()
+            break
 
             p = 100 // batch_size
             if (batch_idx+1) % p == 0:
