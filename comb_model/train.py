@@ -60,8 +60,8 @@ if __name__ == '__main__':
     print('Start training...')
     #news_df = pd.read_csv('../data/rwe_news_dataset.csv', sep=';')
     #price_df = pd.read_csv('../data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
-    news_df = pd.read_csv('rwe_news_dataset.csv', sep=';')
-    price_df = pd.read_csv('rwe_price_dataset.csv', sep=';', index_col='time_stamp')
+    news_df = pd.read_csv('data/rwe_news_dataset.csv', sep=';')
+    price_df = pd.read_csv('data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
     print('Set up Data Loader...')
     train_set = Dataset(
         news_df=news_df,
