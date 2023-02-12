@@ -36,7 +36,7 @@ class StockPriceModel(nn.Module):
             )
 
         # pooled = last_hidden_state[:, :, 0, :]
-        pooled = second_last_hidden_state.mean(dim=2)
+        pooled = last_hidden_state.mean(dim=2)
         news_fv = self.text_feature_ext(pooled)
 
         return news_fv

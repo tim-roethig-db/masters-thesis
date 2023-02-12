@@ -11,34 +11,41 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
-    epochs = 10
-    n_news_features = 16
-    rnn_n_layers = 1
-    rnn_hidden_size = 16
+    epochs = 1
+    n_news_features = 0
+    rnn_n_layers = 2
+    rnn_hidden_size = 8
     seq_len = 10
     lag = 1
+    model_typ = 'rnn'   # rnn, arn, tf
+    location = 'local'  # clust, local
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     print(f'Using device: {device}')
 
     print('Loaded model to device...')
-    """
-    model = StockPriceModelRNN(
-        n_news_features=n_news_features,
-        rnn_n_layers=rnn_n_layers,
-        rnn_hidden_size=rnn_hidden_size
-    ).float()
-    
-    model = StockPriceModelARN(
-        n_news_features=n_news_features,
-        seq_len=seq_len
-    ).float()
-    """
-    model = StockPriceModelTransformer(
-        n_news_features=n_news_features,
-        seq_len=seq_len
-    ).float()
+    if model_typ == 'rnn':
+        shuffle = False
+        model = StockPriceModelRNN(
+            n_news_features=n_news_features,
+            rnn_n_layers=rnn_n_layers,
+            rnn_hidden_size=rnn_hidden_size
+        ).float()
+    elif model_typ == 'arn':
+        shuffle = True
+        model = StockPriceModelARN(
+            n_news_features=n_news_features,
+            seq_len=seq_len
+        ).float()
+    elif model_typ == 'tf':
+        shuffle = True
+        model = StockPriceModelTransformer(
+            n_news_features=n_news_features,
+            seq_len=seq_len
+        ).float()
+    else:
+        raise ArgumentError
 
     #model = torch.nn.DataParallel(model)
     model = model.to(device)
@@ -58,12 +65,16 @@ if __name__ == '__main__':
     mae_loss = torch.nn.L1Loss(reduction='sum').to(device)
 
     print('Start training...')
-    #news_df = pd.read_csv('../data/rwe_news_dataset.csv', sep=';')
-    #price_df = pd.read_csv('../data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
-    news_df = pd.read_csv('data/rwe_news_dataset.csv', sep=';')
-    price_df = pd.read_csv('data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
+    if location == 'local':
+        news_df = pd.read_csv('../data/rwe_news_dataset.csv', sep=';')
+        price_df = pd.read_csv('../data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
+    elif location == 'clust':
+        news_df = pd.read_csv('data/rwe_news_dataset.csv', sep=';')
+        price_df = pd.read_csv('data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
+    else:
+        raise ArgumentError
     print('Set up Data Loader...')
-    shuffle = False
+
     train_set = Dataset(
         news_df=news_df,
         price_df=price_df,
@@ -121,10 +132,12 @@ if __name__ == '__main__':
 
             # get prediction
             y_pred, state = model(x_price, x_news_input_ids, x_news_attention_mask, state)
-            #state = state.detach()
-            #state = [x.detach() for x in state]
-            #y_pred = torch.ones((batch_size, 1))
-            state = None
+            # y_pred = torch.ones((batch_size, 1))
+            if model_typ == 'rnn':
+                state = state.detach()
+                #state = [x.detach() for x in state]
+            else:
+                state = None
 
             # compute loss
             #y = y[:, :, 0]
@@ -160,10 +173,13 @@ if __name__ == '__main__':
 
                 # get prediction
                 y_pred, state = model(x_price, x_news_input_ids, x_news_attention_mask, state)
-                #state = state.detach()
-                #state = [x.detach() for x in state]
-                #y_pred = torch.ones((batch_size, 1))
-                state = None
+                # y_pred = torch.ones((batch_size, 1))
+
+                if model_typ == 'rnn':
+                    state = state.detach()
+                    # state = [x.detach() for x in state]
+                else:
+                    state = None
 
                 # compute loss
                 #y = y[:, :, 0]
@@ -179,6 +195,7 @@ if __name__ == '__main__':
             Test: BCELoss: {epoch_loss_test/len(test_set):.5f}, Acc: {epoch_monitor_loss_test/len(test_set):.5f}
             '''
         )
+
         loss_df.append([
             epoch,
             (epoch_monitor_loss/len(train_set)).item(),
@@ -187,7 +204,15 @@ if __name__ == '__main__':
 
     print('Save model...')
     file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
-    path = f'~/{file_name}'
+    if location == 'local':
+        path = f'./{file_name}'
+        model_path = f'./{file_name}/model.t7'
+    elif location == 'clust':
+        path = f'~/{file_name}'
+        model_path = f'/home/mollik/{file_name}/model.t7'
+    else:
+        raise ArgumentError
+
     os.system(f'mkdir {path}')
 
     loss_df = pd.DataFrame(
@@ -207,6 +232,6 @@ if __name__ == '__main__':
         'lag': lag
     }).to_json(f'{path}/conf.json')
 
-    torch.save(model.state_dict(), f'/home/mollik/{file_name}/model.t7')
+    torch.save(model.state_dict(), model_path)
 
     #os.system(f'zip -r {path}.zip {path}')
