@@ -11,7 +11,7 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
-    epochs = 10
+    epochs = 1
     n_news_features = 16
     rnn_n_layers = 1
     rnn_hidden_size = 16
@@ -58,10 +58,10 @@ if __name__ == '__main__':
     mae_loss = torch.nn.L1Loss(reduction='sum').to(device)
 
     print('Start training...')
-    #news_df = pd.read_csv('../data/rwe_news_dataset.csv', sep=';')
-    #price_df = pd.read_csv('../data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
-    news_df = pd.read_csv('data/rwe_news_dataset.csv', sep=';')
-    price_df = pd.read_csv('data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
+    news_df = pd.read_csv('../data/rwe_news_dataset.csv', sep=';')
+    price_df = pd.read_csv('../data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
+    #news_df = pd.read_csv('data/rwe_news_dataset.csv', sep=';')
+    #price_df = pd.read_csv('data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
     print('Set up Data Loader...')
     train_set = Dataset(
         news_df=news_df,

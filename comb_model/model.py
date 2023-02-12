@@ -105,12 +105,17 @@ class StockPriceModelARN(nn.Module):
                     output_hidden_states=True,
                     return_dict=True
                 )
+
                 last_hidden_state = bert_out['last_hidden_state'].unflatten(
                     0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size))
                 )
+                second_last_hidden_state = bert_out['hidden_states'][-2].unflatten(
+                    0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size))
+                )
 
-            cls_token = last_hidden_state[:, :, 0, :]
-            news_fv = self.text_feature_ext(cls_token)
+            #pooled = last_hidden_state[:, :, 0, :]
+            pooled = second_last_hidden_state.mean(dim=2)
+            news_fv = self.text_feature_ext(pooled)
 
             # cat price with news features
             y = torch.cat((x_price, news_fv), dim=2)
