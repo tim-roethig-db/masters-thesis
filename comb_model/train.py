@@ -12,13 +12,13 @@ if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
     epochs = 1
-    n_news_features = 0
+    n_news_features = 8
     rnn_n_layers = 2
     rnn_hidden_size = 8
     seq_len = 10
     lag = 1
     model_typ = 'rnn'   # rnn, arn, tf
-    location = 'local'  # clust, local
+    location = 'clust'  # clust, local
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
