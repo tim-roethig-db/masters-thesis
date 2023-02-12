@@ -98,7 +98,7 @@ if __name__ == '__main__':
         # reset state every epoch
         state = None
 
-        # iter over batches
+        # train
         for batch_idx, (x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
             #print(batch_idx)
             """
@@ -147,6 +147,7 @@ if __name__ == '__main__':
             else:
                 batch_monitor_loss += monitor_loss
 
+        # test
         model.eval()
         with torch.no_grad():
             for batch_idx, (x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(test_loader):
@@ -169,6 +170,7 @@ if __name__ == '__main__':
                 epoch_loss_test += loss(y_pred, y)
                 epoch_monitor_loss_test += torch.sum(y_pred_class == y)
         model.train()
+
         print(
             f'''
             EPOCH: {epoch} of {epochs}: 

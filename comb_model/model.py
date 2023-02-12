@@ -76,6 +76,7 @@ class StockPriceModelARN(nn.Module):
             self.text_feature_ext = nn.Sequential(
                 nn.Linear(768, 128),
                 nn.Tanh(),
+                nn.Dropout(0.1),
                 nn.Linear(128, n_news_features),
                 nn.Tanh()
             )
@@ -83,6 +84,7 @@ class StockPriceModelARN(nn.Module):
         self.reg_head = nn.Sequential(
             nn.Linear((n_news_features+1)*seq_len, 32),
             nn.Tanh(),
+            nn.Dropout(0.1),
             nn.Linear(32, 8),
             nn.Tanh(),
             nn.Linear(8, 1),
