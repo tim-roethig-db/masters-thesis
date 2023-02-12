@@ -23,7 +23,7 @@ if __name__ == '__main__':
     print(f'Using device: {device}')
 
     print('Loaded model to device...')
-    """
+
     model = StockPriceModelRNN(
         n_news_features=n_news_features,
         rnn_n_layers=rnn_n_layers,
@@ -34,7 +34,7 @@ if __name__ == '__main__':
         n_news_features=n_news_features,
         seq_len=seq_len
     ).float()
-    """
+    
     model = StockPriceModelTransformer(
         n_news_features=n_news_features,
         seq_len=seq_len
@@ -58,11 +58,12 @@ if __name__ == '__main__':
     mae_loss = torch.nn.L1Loss(reduction='sum').to(device)
 
     print('Start training...')
-    #news_df = pd.read_csv('../data/rwe_news_dataset.csv', sep=';')
-    #price_df = pd.read_csv('../data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
-    news_df = pd.read_csv('data/rwe_news_dataset.csv', sep=';')
-    price_df = pd.read_csv('data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
+    news_df = pd.read_csv('../data/rwe_news_dataset.csv', sep=';')
+    price_df = pd.read_csv('../data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
+    #news_df = pd.read_csv('data/rwe_news_dataset.csv', sep=';')
+    #price_df = pd.read_csv('data/rwe_price_dataset.csv', sep=';', index_col='time_stamp')
     print('Set up Data Loader...')
+    shuffle = False
     train_set = Dataset(
         news_df=news_df,
         price_df=price_df,
@@ -70,10 +71,10 @@ if __name__ == '__main__':
         lag=lag,
         seq_len=seq_len,
         test_len=1,
-        sample=True
+        shuffle=shuffle
     )
 
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=shuffle, drop_last=True)
     test_set = Dataset(
         news_df=news_df,
         price_df=price_df,
@@ -81,9 +82,9 @@ if __name__ == '__main__':
         lag=lag,
         seq_len=seq_len,
         test_len=1,
-        sample=True
+        shuffle=shuffle
     )
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=True, drop_last=True)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=shuffle, drop_last=True)
 
     print('Start train loop...')
     loss_df = list()
@@ -100,7 +101,7 @@ if __name__ == '__main__':
 
         # train
         for batch_idx, (x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
-            print(batch_idx)
+            #print(batch_idx)
             """
             if torch.cuda.is_available():
                 for i in range(4):

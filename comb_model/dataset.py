@@ -10,7 +10,7 @@ pd.set_option('expand_frame_repr', False)
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, news_df: pd.DataFrame, price_df: pd.DataFrame, testing: bool, lag: int, seq_len: int,
-                 test_len: int, sample: bool):
+                 test_len: int, shuffle: bool):
         self.dtype = 'float32'
         self.seq_len = seq_len
         self.test_len = test_len
@@ -37,7 +37,7 @@ class Dataset(torch.utils.data.Dataset):
         df['title'] = df['title'].shift(-lag)
         df = df.drop(df.tail(lag).index)
 
-        if sample:
+        if shuffle:
             df = df.sample(frac=1, random_state=1).reset_index(drop=True)
 
         if not testing:

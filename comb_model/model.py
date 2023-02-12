@@ -4,6 +4,17 @@ from transformers import BertModel
 
 
 class StockPriceModel(nn.Module):
+    def init_news_feature_ext(self, n_news_features):
+        # self.bert = BertModel.from_pretrained('../models/finbert')
+        self.bert = BertModel.from_pretrained('ProsusAI/finbert')
+        for param in self.bert.parameters():
+            param.requires_grad = False
+
+        self.text_feature_ext = nn.Sequential(
+            nn.Linear(768, n_news_features),
+            nn.Tanh()
+        )
+
     def news_processing(self, x_news_input_ids, x_news_attention_mask):
         batch_size = x_news_input_ids.shape[0]
 
@@ -37,15 +48,7 @@ class StockPriceModelRNN(StockPriceModel):
         self.model_name = 'model_rnn'
         self.n_news_features = n_news_features
         if self.n_news_features > 0:
-            #self.bert = BertModel.from_pretrained('../models/finbert')
-            self.bert = BertModel.from_pretrained('ProsusAI/finbert')
-            for param in self.bert.parameters():
-                param.requires_grad = False
-
-            self.text_feature_ext = nn.Sequential(
-                nn.Linear(768, n_news_features),
-                nn.ReLU()
-            )
+            self.init_news_feature_ext(n_news_features)
 
         self.rnn = nn.GRU(
             input_size=n_news_features + 1,
@@ -84,17 +87,9 @@ class StockPriceModelARN(StockPriceModel):
         self.n_news_features = n_news_features
 
         if self.n_news_features > 0:
-            #self.bert = BertModel.from_pretrained('../models/finbert')
-            self.bert = BertModel.from_pretrained('ProsusAI/finbert')
-            for param in self.bert.parameters():
-                param.requires_grad = False
+            self.init_news_feature_ext(n_news_features)
 
-            self.text_feature_ext = nn.Sequential(
-                nn.Linear(768, n_news_features),
-                nn.Tanh()
-            )
-
-        self.reg_head = nn.Sequential(
+        self.clf_head = nn.Sequential(
             nn.Linear((n_news_features+1)*seq_len, 32),
             nn.Tanh(),
             nn.Dropout(0.1),
@@ -115,7 +110,7 @@ class StockPriceModelARN(StockPriceModel):
         else:
             y = x_price[:, :, 0]
 
-        y = self.reg_head(y)
+        y = self.clf_head(y)
 
         return y, state
 
@@ -139,21 +134,14 @@ class Time2Vec(nn.Module):
         return t2v
 
 
-class StockPriceModelTransformer(nn.Module):
+class StockPriceModelTransformer(StockPriceModel):
     def __init__(self, n_news_features: int, seq_len: int):
         super(StockPriceModelTransformer, self).__init__()
         self.model_name = 'model_tf'
         self.n_news_features = n_news_features
 
         if self.n_news_features > 0:
-            self.bert = BertModel.from_pretrained('../models/finbert')
-            for param in self.bert.parameters():
-                param.requires_grad = False
-
-            self.custom_pooler = nn.Sequential(
-                nn.Linear(768, n_news_features),
-                nn.Tanh()
-            )
+            self.init_news_feature_ext(n_news_features)
 
         self.t2v = Time2Vec(n_news_features+1, 2*(n_news_features+1))
 
@@ -170,33 +158,20 @@ class StockPriceModelTransformer(nn.Module):
 
         self.global_avg_pooling = nn.AvgPool1d(3*(1+n_news_features))
 
-        self.reg_head = nn.Sequential(
+        self.clf_head = nn.Sequential(
             nn.Dropout(0.1),
             nn.Linear(seq_len, 64),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.Dropout(0.1),
-            nn.Linear(64, 1)
+            nn.Linear(64, 1),
+            nn.Sigmoid()
         )
 
     def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
         if self.n_news_features > 0:
             # compute bert embedding
-            batch_size = x_news_input_ids.shape[0]
-            with torch.no_grad():
-                x_news_input_ids = x_news_input_ids.flatten(start_dim=0, end_dim=1)
-                x_news_attention_mask = x_news_attention_mask.flatten(start_dim=0, end_dim=1)
-                bert_out = self.bert(
-                    input_ids=x_news_input_ids,
-                    attention_mask=x_news_attention_mask,
-                    return_dict=True
-                )
-
-            last_hidden_state = bert_out['last_hidden_state'].unflatten(
-                0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size))
-            )
-            cls = last_hidden_state[:, :, 0, :]
-            pooler_output = self.custom_pooler(cls)
-            x = torch.cat((x_price, pooler_output), dim=2)
+            news_fv = self.news_processing(x_news_input_ids, x_news_attention_mask)
+            x = torch.cat((x_price, news_fv), dim=2)
 
         else:
             x = x_price
@@ -210,7 +185,7 @@ class StockPriceModelTransformer(nn.Module):
         x = self.global_avg_pooling(transformer_out)
         x = x[:, :, 0]
 
-        y = self.reg_head(x)
+        y = self.clf_head(x)
 
         return y, state
 
