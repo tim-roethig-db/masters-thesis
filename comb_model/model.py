@@ -26,7 +26,10 @@ class StockPriceModelRNN(nn.Module):
             batch_first=True,
         )
 
-        self.linear = nn.Linear(rnn_hidden_size, 1)
+        self.clf_head = nn.Sequential(
+            nn.Linear(rnn_hidden_size, 1),
+            nn.Softmax()
+        )
 
     def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
         if self.n_news_features > 0:
@@ -74,10 +77,7 @@ class StockPriceModelARN(nn.Module):
                 param.requires_grad = False
 
             self.text_feature_ext = nn.Sequential(
-                nn.Linear(768, 128),
-                nn.Tanh(),
-                nn.Dropout(0.1),
-                nn.Linear(128, n_news_features),
+                nn.Linear(768, n_news_features),
                 nn.Tanh()
             )
 
