@@ -143,8 +143,6 @@ if __name__ == '__main__':
             if (batch_idx+1) % p == 0:
                 batch_monitor_loss += monitor_loss
                 #print(f'Acc: {batch_monitor_loss/(p*batch_size):.5f}')
-                loss_df.append([epoch, batch_idx+1, (batch_monitor_loss/(p*batch_size)).item()])
-
                 batch_monitor_loss = 0
             else:
                 batch_monitor_loss += monitor_loss
@@ -178,6 +176,11 @@ if __name__ == '__main__':
             Test: BCELoss: {epoch_loss_test/len(test_set):.5f}, Acc: {epoch_monitor_loss_test/len(test_set):.5f}
             '''
         )
+        loss_df.append([
+            epoch,
+            (epoch_monitor_loss/len(train_set)).item(),
+            (epoch_monitor_loss_test/len(test_set)).item()
+        ])
 
     print('Save model...')
     file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
@@ -185,10 +188,10 @@ if __name__ == '__main__':
     os.system(f'mkdir {path}')
 
     loss_df = pd.DataFrame(
-        columns=['epoch', 'iteration', 'MAE'],
+        columns=['epoch', 'train_acc', 'test_acc'],
         data=loss_df
     )
-    loss_df.to_csv(f'{path}/train_loss.csv', index=False, sep=';')
+    loss_df.to_csv(f'{path}/loss.csv', index=False, sep=';')
 
     pd.DataFrame({
         'batch_size': [batch_size],
