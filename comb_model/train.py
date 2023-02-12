@@ -12,7 +12,7 @@ if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
     epochs = 10
-    n_news_features = 16
+    n_news_features = 8
     rnn_n_layers = 1
     rnn_hidden_size = 16
     seq_len = 10
@@ -23,23 +23,23 @@ if __name__ == '__main__':
     print(f'Using device: {device}')
 
     print('Loaded model to device...')
-
+    """
     model = StockPriceModelRNN(
         n_news_features=n_news_features,
         rnn_n_layers=rnn_n_layers,
         rnn_hidden_size=rnn_hidden_size
     ).float()
-    """
+    
     model = StockPriceModelARN(
         n_news_features=n_news_features,
         seq_len=seq_len
     ).float()
-    
+    """
     model = StockPriceModelTransformer(
         n_news_features=n_news_features,
         seq_len=seq_len
     ).float()
-    """
+
     #model = torch.nn.DataParallel(model)
     model = model.to(device)
 
