@@ -3,14 +3,42 @@ import torch.nn as nn
 from transformers import BertModel
 
 
-class StockPriceModelRNN(nn.Module):
+class StockPriceModel(nn.Module):
+    def news_processing(self, x_news_input_ids, x_news_attention_mask):
+        batch_size = x_news_input_ids.shape[0]
+
+        with torch.no_grad():
+            x_news_input_ids = x_news_input_ids.flatten(start_dim=0, end_dim=1)
+            x_news_attention_mask = x_news_attention_mask.flatten(start_dim=0, end_dim=1)
+            bert_out = self.bert(
+                input_ids=x_news_input_ids,
+                attention_mask=x_news_attention_mask,
+                output_hidden_states=True,
+                return_dict=True
+            )
+
+            last_hidden_state = bert_out['last_hidden_state'].unflatten(
+                0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size))
+            )
+            second_last_hidden_state = bert_out['hidden_states'][-2].unflatten(
+                0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size))
+            )
+
+        # pooled = last_hidden_state[:, :, 0, :]
+        pooled = second_last_hidden_state.mean(dim=2)
+        news_fv = self.text_feature_ext(pooled)
+
+        return news_fv
+
+
+class StockPriceModelRNN(StockPriceModel):
     def __init__(self, n_news_features: int, rnn_n_layers: int, rnn_hidden_size: int):
         super(StockPriceModelRNN, self).__init__()
         self.model_name = 'model_rnn'
         self.n_news_features = n_news_features
         if self.n_news_features > 0:
             #self.bert = BertModel.from_pretrained('../models/finbert')
-            self.bert = BertModel.from_pretrained('finbert')
+            self.bert = BertModel.from_pretrained('ProsusAI/finbert')
             for param in self.bert.parameters():
                 param.requires_grad = False
 
@@ -28,28 +56,13 @@ class StockPriceModelRNN(nn.Module):
 
         self.clf_head = nn.Sequential(
             nn.Linear(rnn_hidden_size, 1),
-            nn.Softmax()
+            nn.Sigmoid()
         )
 
     def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
         if self.n_news_features > 0:
-            # apply news processing
-            batch_size = x_news_input_ids.shape[0]
-
-            with torch.no_grad():
-                x_news_input_ids = x_news_input_ids.flatten(start_dim=0, end_dim=1)
-                x_news_attention_mask = x_news_attention_mask.flatten(start_dim=0, end_dim=1)
-                bert_out = self.bert(
-                    input_ids=x_news_input_ids,
-                    attention_mask=x_news_attention_mask,
-                    output_hidden_states=True,
-                    return_dict=True
-                )
-                last_hidden_state = bert_out['last_hidden_state'].unflatten(
-                    0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size))
-                )
-
-            news_fv = self.text_feature_ext(last_hidden_state[:, :, 0, :])
+            # news feature extraction
+            news_fv = self.news_processing(x_news_input_ids, x_news_attention_mask)
 
             # cat price with news features
             y = torch.cat((x_price, news_fv), dim=2)
@@ -59,12 +72,12 @@ class StockPriceModelRNN(nn.Module):
         # run rnn
         y, state = self.rnn(y, state)
 
-        y = self.linear(y[:, -1, :])
+        y = self.clf_head(y[:, -1, :])
 
         return y, state
 
 
-class StockPriceModelARN(nn.Module):
+class StockPriceModelARN(StockPriceModel):
     def __init__(self, n_news_features: int, seq_len: int):
         super(StockPriceModelARN, self).__init__()
         self.model_name = 'model_arn'
@@ -94,28 +107,7 @@ class StockPriceModelARN(nn.Module):
     def forward(self, x_price, x_news_input_ids, x_news_attention_mask, state=None):
         if self.n_news_features > 0:
             # news feature extraction
-            batch_size = x_news_input_ids.shape[0]
-
-            with torch.no_grad():
-                x_news_input_ids = x_news_input_ids.flatten(start_dim=0, end_dim=1)
-                x_news_attention_mask = x_news_attention_mask.flatten(start_dim=0, end_dim=1)
-                bert_out = self.bert(
-                    input_ids=x_news_input_ids,
-                    attention_mask=x_news_attention_mask,
-                    output_hidden_states=True,
-                    return_dict=True
-                )
-
-                last_hidden_state = bert_out['last_hidden_state'].unflatten(
-                    0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size))
-                )
-                second_last_hidden_state = bert_out['hidden_states'][-2].unflatten(
-                    0, (batch_size, int(bert_out['last_hidden_state'].shape[0] / batch_size))
-                )
-
-            #pooled = last_hidden_state[:, :, 0, :]
-            pooled = second_last_hidden_state.mean(dim=2)
-            news_fv = self.text_feature_ext(pooled)
+            news_fv = self.news_processing(x_news_input_ids, x_news_attention_mask)
 
             # cat price with news features
             y = torch.cat((x_price, news_fv), dim=2)

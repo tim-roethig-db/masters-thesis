@@ -11,7 +11,7 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
-    epochs = 10
+    epochs = 1
     n_news_features = 16
     rnn_n_layers = 1
     rnn_hidden_size = 16
@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
         # train
         for batch_idx, (x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
-            #print(batch_idx)
+            print(batch_idx)
             """
             if torch.cuda.is_available():
                 for i in range(4):
