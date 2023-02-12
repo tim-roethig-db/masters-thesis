@@ -38,7 +38,7 @@ class Dataset(torch.utils.data.Dataset):
         df = df.drop(df.tail(lag).index)
 
         if sample:
-            df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+            df = df.sample(frac=1, random_state=1).reset_index(drop=True)
 
         if not testing:
             df = df.drop(df.tail(len(df)-3000).index)
