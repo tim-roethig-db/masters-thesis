@@ -11,12 +11,12 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
-    epochs = 20
-    n_news_features = 8
+    epochs = 10
+    n_news_features = 16
     rnn_n_layers = 2
     rnn_hidden_size = 8
-    seq_len = 10
-    lag = 1
+    seq_len = 20
+    lag = 0
     model_typ = 'rnn'   # rnn, arn, tf
     location = 'clust'  # clust, local
 
@@ -203,7 +203,8 @@ if __name__ == '__main__':
         ])
 
     print('Save model...')
-    file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
+    #file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
+    file_name = f'{model.model_name}_lag{lag}'
     if location == 'local':
         path = f'./{file_name}'
         model_path = f'./{file_name}/model.t7'
