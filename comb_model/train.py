@@ -16,7 +16,7 @@ if __name__ == '__main__':
     rnn_n_layers = 2
     rnn_hidden_size = 8
     seq_len = 20
-    lag = 1
+    lag = 2
     model_typ = 'rnn'   # rnn, arn, tf
     location = 'clust'  # clust, local
 
