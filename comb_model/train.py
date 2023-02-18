@@ -15,8 +15,8 @@ if __name__ == '__main__':
     n_news_features = 16
     rnn_n_layers = 2
     rnn_hidden_size = 8
-    seq_len = 20
-    lag = 4
+    seq_len = 10
+    lag = 0
     model_typ = 'rnn'   # rnn, arn, tf
     location = 'clust'  # clust, local
 
