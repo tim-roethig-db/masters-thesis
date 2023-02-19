@@ -16,8 +16,8 @@ if __name__ == '__main__':
     rnn_n_layers = 2
     rnn_hidden_size = 8
     seq_len = 10
-    lag = 5
-    model_typ = 'arn'   # rnn, arn, tf
+    lag = 0
+    model_typ = 'tf'   # rnn, arn, tf
     location = 'clust'  # clust, local
 
     # set device to cuda if available
