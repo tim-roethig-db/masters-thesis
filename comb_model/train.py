@@ -11,13 +11,13 @@ from model import StockPriceModelRNN, StockPriceModelARN, StockPriceModelTransfo
 if __name__ == '__main__':
     batch_size = 16
     lr = 0.001
-    epochs = 10
+    epochs = 100
     n_news_features = 16
     rnn_n_layers = 2
     rnn_hidden_size = 8
     seq_len = 10
-    lag = 5
-    model_typ = 'tf'   # rnn, arn, tf
+    lag = 1
+    model_typ = 'arn'   # rnn, arn, tf
     location = 'clust'  # clust, local
 
     # set device to cuda if available
