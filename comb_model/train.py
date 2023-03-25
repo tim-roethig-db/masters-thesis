@@ -1,5 +1,3 @@
-import os
-from datetime import datetime
 import pandas as pd
 import torch
 from pynvml import *
@@ -17,8 +15,8 @@ if __name__ == '__main__':
     rnn_hidden_size = 8
     seq_len = 10
     lag = 1
-    model_typ = 'arn'   # rnn, arn, tf
-    location = 'clust'  # clust, local
+    model_typ = 'rnn'  # rnn, arn, tf
+    location = 'local'  # clust, local
 
     # set device to cuda if available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -47,7 +45,7 @@ if __name__ == '__main__':
     else:
         raise ArgumentError
 
-    #model = torch.nn.DataParallel(model)
+    # model = torch.nn.DataParallel(model)
     model = model.to(device)
 
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -60,7 +58,7 @@ if __name__ == '__main__':
     )
 
     print('Setup loss function...')
-    #loss = torch.nn.MSELoss().to(device)
+    # loss = torch.nn.MSELoss().to(device)
     loss = torch.nn.BCELoss().to(device)
     mae_loss = torch.nn.L1Loss(reduction='sum').to(device)
 
@@ -99,7 +97,7 @@ if __name__ == '__main__':
 
     print('Start train loop...')
     loss_df = list()
-    for epoch in range(1, epochs+1):
+    for epoch in range(1, epochs + 1):
         epoch_loss = 0
         epoch_monitor_loss = 0
         batch_monitor_loss = 0
@@ -112,7 +110,7 @@ if __name__ == '__main__':
 
         # train
         for batch_idx, (x_price, x_news_input_ids, x_news_attention_mask, y) in enumerate(train_loader):
-            #print(batch_idx)
+            # print(batch_idx)
             """
             if torch.cuda.is_available():
                 for i in range(4):
@@ -135,16 +133,16 @@ if __name__ == '__main__':
             # y_pred = torch.ones((batch_size, 1))
             if model_typ == 'rnn':
                 state = state.detach()
-                #state = [x.detach() for x in state]
+                # state = [x.detach() for x in state]
             else:
                 state = None
 
             # compute loss
-            #y = y[:, :, 0]
+            # y = y[:, :, 0]
             y_pred_class = (y_pred > 0.5).float()
             batch_loss = loss(y_pred, y)
             epoch_loss += batch_loss
-            #monitor_loss = mae_loss(y_pred, y)
+            # monitor_loss = mae_loss(y_pred, y)
             monitor_loss = torch.sum(y_pred_class == y)
             epoch_monitor_loss += monitor_loss
 
@@ -154,9 +152,9 @@ if __name__ == '__main__':
             optimizer.step()
 
             p = 100 // batch_size
-            if (batch_idx+1) % p == 0:
+            if (batch_idx + 1) % p == 0:
                 batch_monitor_loss += monitor_loss
-                #print(f'Acc: {batch_monitor_loss/(p*batch_size):.5f}')
+                # print(f'Acc: {batch_monitor_loss/(p*batch_size):.5f}')
                 batch_monitor_loss = 0
             else:
                 batch_monitor_loss += monitor_loss
@@ -182,7 +180,7 @@ if __name__ == '__main__':
                     state = None
 
                 # compute loss
-                #y = y[:, :, 0]
+                # y = y[:, :, 0]
                 y_pred_class = (y_pred > 0.5).float()
                 epoch_loss_test += loss(y_pred, y)
                 epoch_monitor_loss_test += torch.sum(y_pred_class == y)
@@ -191,19 +189,19 @@ if __name__ == '__main__':
         print(
             f'''
             EPOCH: {epoch} of {epochs}: 
-            Train: BCELoss: {epoch_loss/len(train_set):.5f}, Acc: {epoch_monitor_loss/len(train_set):.5f}
-            Test: BCELoss: {epoch_loss_test/len(test_set):.5f}, Acc: {epoch_monitor_loss_test/len(test_set):.5f}
+            Train: BCELoss: {epoch_loss / len(train_set):.5f}, Acc: {epoch_monitor_loss / len(train_set):.5f}
+            Test: BCELoss: {epoch_loss_test / len(test_set):.5f}, Acc: {epoch_monitor_loss_test / len(test_set):.5f}
             '''
         )
 
         loss_df.append([
             epoch,
-            (epoch_monitor_loss/len(train_set)).item(),
-            (epoch_monitor_loss_test/len(test_set)).item()
+            (epoch_monitor_loss / len(train_set)).item(),
+            (epoch_monitor_loss_test / len(test_set)).item()
         ])
 
     print('Save model...')
-    #file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
+    # file_name = f'{model.model_name}_{datetime.now().strftime("%m-%d-%Y_%H-%M-%S")}'
     file_name = f'{model.model_name}_lag{lag}'
     if location == 'local':
         path = f'./{file_name}'
@@ -235,4 +233,4 @@ if __name__ == '__main__':
 
     torch.save(model.state_dict(), model_path)
 
-    #os.system(f'zip -r {path}.zip {path}')
+    # os.system(f'zip -r {path}.zip {path}')

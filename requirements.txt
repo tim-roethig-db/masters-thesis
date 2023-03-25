@@ -1,3 +1,14 @@
-pandas==1.4.4
-torch==1.12.1
+numpy==1.23.3
+pandas==1.5.3
+pynvml==11.4.1
+torch==1.13.1
 transformers==4.25.1
+bertopic==0.13.0
+gensim==4.2.0
+nltk==3.7
+octis==1.11.1
+wordcloud==1.8.2.2
+scikit-learn==0.24.2
+pyLDAvis==3.3.1
+matplotlib==3.5.3
+statsmodels==0.13.5
